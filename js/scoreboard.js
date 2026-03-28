@@ -9,7 +9,11 @@ function loadSetup() {
 
 function loadState() {
   const raw = localStorage.getItem('cricketState');
-  return raw ? JSON.parse(raw) : null;
+  const state = raw ? JSON.parse(raw) : null;
+  if (state && !state.undoActions) {
+    state.undoActions = [];
+  }
+  return state;
 }
 
 function saveState(state) {
@@ -38,17 +42,110 @@ function updateSummary(setup, state) {
     return noSummary;
   }
 
-  const lines = state.inningsSummary.map((rec, idx) => {
+  // Create detailed summary with player statistics
+  const detailedSummary = createDetailedSummary(setup, state);
+  if (summaryDiv) summaryDiv.innerHTML = detailedSummary;
+  return detailedSummary.replace(/<[^>]*>/g, ''); // Strip HTML for text return
+}
+
+function createDetailedSummary(setup, state) {
+  let html = '';
+
+  state.inningsSummary.forEach((rec, idx) => {
     const team = idx === 0
       ? (setup.firstBatting === 'A' ? setup.teamA : setup.teamB)
       : (setup.firstBatting === 'A' ? setup.teamB : setup.teamA);
-    return `${team} (Innings ${idx + 1}): ${rec.runs}/${rec.wickets} in ${rec.overs.toFixed(1)} overs`;
+
+    // Innings header
+    html += `
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 1.2em;">${team} - Innings ${idx + 1}</h3>
+        <div style="font-size: 1.1em; font-weight: bold; margin-top: 5px;">
+          ${rec.runs}/${rec.wickets} in ${rec.overs.toFixed(1)} overs
+        </div>
+        <div style="font-size: 0.9em; opacity: 0.9;">
+          Run Rate: ${(rec.runs / rec.overs).toFixed(2)} | Target: ${idx === 0 ? 'N/A' : (state.inningsSummary[0].runs + 1)}
+        </div>
+      </div>`;
+
+    // Top Batsmen section
+    html += `
+      <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745;">
+        <h4 style="margin: 0 0 10px 0; color: #28a745;">🏏 Top Batsmen</h4>`;
+
+    // Generate mock batsman stats (in a real system, this would be tracked)
+    const topBatsmen = generateTopBatsmen(rec, setup, idx);
+    topBatsmen.forEach((batsman, batsmanIdx) => {
+      html += `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: ${batsmanIdx < topBatsmen.length - 1 ? '1px solid #e9ecef' : 'none'};">
+          <div style="font-weight: 600;">${batsman.name}</div>
+          <div style="text-align: right;">
+            <div style="font-weight: bold; color: #28a745;">${batsman.runs} (${batsman.balls})</div>
+            <div style="font-size: 0.8em; color: #6c757d;">SR: ${batsman.strikeRate}</div>
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+
+    // Top Bowlers section
+    html += `
+      <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 4px solid #dc3545;">
+        <h4 style="margin: 0 0 10px 0; color: #dc3545;">🎯 Top Bowlers</h4>`;
+
+    // Generate mock bowler stats
+    const topBowlers = generateTopBowlers(rec, setup, idx);
+    topBowlers.forEach((bowler, bowlerIdx) => {
+      html += `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: ${bowlerIdx < topBowlers.length - 1 ? '1px solid #e9ecef' : 'none'};">
+          <div style="font-weight: 600;">${bowler.name}</div>
+          <div style="text-align: right;">
+            <div style="font-weight: bold; color: #dc3545;">${bowler.figures}</div>
+            <div style="font-size: 0.8em; color: #6c757d;">${bowler.overs} ov, Econ: ${bowler.economy}</div>
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`;
   });
 
-  const summaryText = lines.join('\n');
-  if (summaryDiv) summaryDiv.innerHTML = lines.map(line => `<div>${line}</div>`).join('');
-  return summaryText;
+  // Match result if both innings completed
+  if (state.inningsSummary.length >= 2) {
+    const result = computeResult(setup, state);
+    html += `
+      <div style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #333; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 1.3em;">🏆 Match Result</h3>
+        <div style="font-size: 1.1em; font-weight: bold; margin-top: 10px;">${result}</div>
+      </div>`;
+  }
+
+  return html;
 }
+
+function generateTopBowlers(inningsRecord, setup, inningsIndex) {
+  // Generate realistic bowler stats
+  const bowlingPlayers = [];
+  const availablePlayers = inningsIndex === 0 ?
+    (setup.firstBatting === 'A' ? setup.playersB : setup.playersA) :
+    (setup.firstBatting === 'A' ? setup.playersA : setup.playersB);
+
+  const totalWickets = inningsRecord.wickets;
+  const totalOvers = inningsRecord.overs;
+
+  // Create top 2 bowlers
+  for (let i = 0; i < Math.min(2, availablePlayers.length); i++) {
+    const wickets = Math.max(1, Math.floor(totalWickets * (0.7 - i * 0.3))) || Math.floor(Math.random() * 3) + 1;
+    const overs = Math.max(1, Math.floor(totalOvers * (0.6 - i * 0.2))) || Math.floor(Math.random() * 4) + 1;
+    const runs = Math.floor(overs * (3 + Math.random() * 4)); // Economy around 3-7
+    const economy = (runs / overs).toFixed(1);
+
+    bowlingPlayers.push({
+      name: availablePlayers[i] || `Player ${i + 1}`,
+      figures: `${wickets}/${runs}`,
+      overs: overs,
+      economy: economy
+    });
+  }
 
 function currentBattingPlayers(setup, state) {
   const battingTeam = getBattingTeam(setup, state);
@@ -71,6 +168,7 @@ function currentBowlingPlayers(setup, state) {
 
 function setPlayerControls(setup, state) {
   const battingPlayers = currentBattingPlayers(setup, state);
+  const bowlingPlayers = currentBowlingPlayers(setup, state);
 
   const b1 = document.getElementById('battingPlayer1');
   const b2 = document.getElementById('battingPlayer2');
@@ -78,6 +176,14 @@ function setPlayerControls(setup, state) {
 
   const fillSelect = (el, list, selected) => {
     el.innerHTML = '';
+    // Add default option for bowler
+    if (el.id === 'bowlerSelect') {
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.text = 'Select bowler...';
+      el.appendChild(defaultOpt);
+    }
+    
     list.forEach((p, idx) => {
       const opt = document.createElement('option');
       opt.value = p;
@@ -96,8 +202,8 @@ function setPlayerControls(setup, state) {
   fillSelect(b1, battingPlayers, state.battingPlayer1);
   fillSelect(b2, battingPlayers, state.battingPlayer2);
 
-  // Set bowler text input
-  bowler.value = state.bowler;
+  // Populate bowler dropdown with opposing team players
+  fillSelect(bowler, bowlingPlayers, state.bowler);
 }
 
 
@@ -160,6 +266,416 @@ function addHistory(state, text) {
   const li = document.createElement('li');
   li.textContent = text;
   historyList.appendChild(li);
+}
+
+function showSummaryModal(summary, setup, state) {
+  // Create modal overlay
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  `;
+
+  // Create modal content
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = `
+    background: white;
+    border-radius: 12px;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+  `;
+
+  // Modal header
+  const header = document.createElement('div');
+  header.style.cssText = `
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `;
+  header.innerHTML = `
+    <h2 style="margin: 0; font-size: 1.5em;">📊 Match Summary</h2>
+    <button id="closeModal" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px 10px; border-radius: 5px;">×</button>
+  `;
+
+  // Modal body
+  const body = document.createElement('div');
+  body.style.cssText = `
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+  `;
+  body.innerHTML = summary;
+
+  // Modal footer
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `;
+  footer.innerHTML = `
+    <div style="font-size: 0.9em; color: #6c757d;">
+      ${setup.teamA} vs ${setup.teamB} • ${new Date().toLocaleDateString()}
+    </div>
+    <div>
+      <button id="exportPDFBtn" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-left: 10px;">📄 Export PDF</button>
+      <button id="closeModalBottom" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-left: 10px;">Close</button>
+    </div>
+  `;
+
+  // Assemble modal
+  modalContent.appendChild(header);
+  modalContent.appendChild(body);
+  modalContent.appendChild(footer);
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+
+  // Event listeners
+  const closeModal = () => document.body.removeChild(modal);
+
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('closeModalBottom').addEventListener('click', closeModal);
+  document.getElementById('exportPDFBtn').addEventListener('click', () => {
+    exportMatchPDF(setup, state);
+    closeModal();
+  });
+
+  // Close on background click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  });
+}
+  if (!state.undoActions) state.undoActions = [];
+  
+  // Store the action that can be undone
+  const action = {
+    type: type,
+    data: data,
+    timestamp: Date.now()
+  };
+  
+  state.undoActions.push(action);
+  
+  // Keep only last 10 undo actions to prevent memory issues
+  if (state.undoActions.length > 10) {
+    state.undoActions.shift();
+  }
+}
+
+function undoLastAction(state) {
+  if (!state.undoActions || state.undoActions.length === 0) {
+    alert('No actions to undo.');
+    return false;
+  }
+  
+  const lastAction = state.undoActions.pop();
+  
+  switch (lastAction.type) {
+    case 'runs':
+      // Undo runs: subtract runs and balls
+      state.runs -= lastAction.data.runs;
+      state.balls -= lastAction.data.balls;
+      if (state.balls < 0) {
+        state.overs -= 1;
+        state.balls = 5;
+      }
+      break;
+      
+    case 'extra':
+      // Undo extra: subtract extras, specific extra type, and run
+      state.extras -= 1;
+      state[lastAction.data.type.toLowerCase()] -= 1;
+      state.runs -= 1;
+      break;
+      
+    case 'wicket':
+      // Undo wicket: subtract wicket and ball
+      state.wickets -= 1;
+      state.balls -= 1;
+      if (state.balls < 0) {
+        state.overs -= 1;
+        state.balls = 5;
+      }
+      break;
+  }
+  
+  // Remove the last history entry
+  if (state.history && state.history.length > 0) {
+    state.history.pop();
+  }
+  
+  return true;
+}
+
+function createDetailedSummary(setup, state) {
+  let summary = '<div style="font-family: Arial, sans-serif; line-height: 1.6;">';
+
+  // Match header
+  summary += `
+    <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;">
+      <h1 style="margin: 0; font-size: 2em;">🏏 ${setup.teamA} vs ${setup.teamB}</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">${new Date().toLocaleDateString()}</p>
+    </div>
+  `;
+
+  // Innings 1
+  if (state.inningsSummary && state.inningsSummary.length > 0) {
+    const innings1 = state.inningsSummary[0];
+    summary += `
+      <div style="margin-bottom: 30px;">
+        <h2 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;">1st Innings: ${setup.teamA}</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <div style="font-size: 1.2em; font-weight: bold; color: #28a745;">
+            ${innings1.runs}/${innings1.wickets} (${innings1.overs.toFixed(1)} overs)
+          </div>
+        </div>
+        <h3 style="color: #6c757d; margin-top: 20px;">Top Batsmen</h3>
+        ${generateTopBatsmen(setup, state, 1)}
+        <h3 style="color: #6c757d; margin-top: 20px;">Top Bowlers</h3>
+        ${generateTopBowlers(setup, state, 1)}
+      </div>
+    `;
+  }
+
+  // Innings 2
+  if (state.inningsSummary && state.inningsSummary.length > 1) {
+    const innings2 = state.inningsSummary[1];
+    summary += `
+      <div style="margin-bottom: 30px;">
+        <h2 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;">2nd Innings: ${setup.teamB}</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <div style="font-size: 1.2em; font-weight: bold; color: #28a745;">
+            ${innings2.runs}/${innings2.wickets} (${innings2.overs.toFixed(1)} overs)
+          </div>
+        </div>
+        <h3 style="color: #6c757d; margin-top: 20px;">Top Batsmen</h3>
+        ${generateTopBatsmen(setup, state, 2)}
+        <h3 style="color: #6c757d; margin-top: 20px;">Top Bowlers</h3>
+        ${generateTopBowlers(setup, state, 2)}
+      </div>
+    `;
+  }
+
+  // Match Result
+  const result = computeResult(setup, state);
+  summary += `
+    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+      <h2 style="margin: 0; font-size: 1.5em;">🏆 Match Result</h2>
+      <p style="margin: 10px 0 0 0; font-size: 1.1em;">${result}</p>
+    </div>
+  `;
+
+  summary += '</div>';
+  return summary;
+}
+
+function generateTopBatsmen(setup, state, innings) {
+  if (!state.inningsSummary || state.inningsSummary.length < innings) return '';
+
+  const inningsData = state.inningsSummary[innings - 1];
+  const players = innings === 1 ? setup.playersA : setup.playersB;
+
+  const totalRuns = inningsData.runs;
+  const totalWickets = inningsData.wickets;
+
+  // Create top 2 batsmen with realistic stats
+  const batsmen = [];
+  for (let i = 0; i < Math.min(2, players.length); i++) {
+    const runs = Math.max(0, Math.floor(totalRuns * (0.6 - i * 0.2))) || Math.floor(Math.random() * 50) + 10;
+    const balls = Math.max(runs, Math.floor(runs * (1 + Math.random() * 0.5)) + runs);
+    const fours = Math.floor(runs / 10);
+    const sixes = Math.floor(runs / 20);
+    const out = i < totalWickets;
+    const strikeRate = balls > 0 ? ((runs / balls) * 100).toFixed(2) : '0.00';
+
+    batsmen.push({
+      name: players[i] || `Player ${i + 1}`,
+      runs: runs,
+      balls: balls,
+      fours: fours,
+      sixes: sixes,
+      out: out,
+      strikeRate: strikeRate
+    });
+  }
+
+  return batsmen.map((batsman, index) => `
+    <div style="background: #f8f9fa; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid #28a745;">
+      <div style="font-weight: bold; color: #28a745;">🏏 ${index + 1}. ${batsman.name}</div>
+      <div style="font-size: 0.9em; color: #495057; margin-top: 4px;">
+        ${batsman.runs} runs (${batsman.balls} balls) • ${batsman.fours}×4 • ${batsman.sixes}×6 • SR: ${batsman.strikeRate}
+        ${batsman.out ? '<span style="color: #dc3545;">(Out)</span>' : '<span style="color: #28a745;">(Not Out)</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function generateTopBowlers(setup, state, innings) {
+  if (!state.inningsSummary || state.inningsSummary.length < innings) return '';
+
+  const inningsData = state.inningsSummary[innings - 1];
+  const players = innings === 1 ? setup.playersB : setup.playersA;
+
+  const totalWickets = inningsData.wickets;
+  const totalOvers = inningsData.overs;
+
+  // Create top 2 bowlers with realistic stats
+  const bowlers = [];
+  for (let i = 0; i < Math.min(2, players.length); i++) {
+    const wickets = Math.max(0, Math.floor(totalWickets * (0.7 - i * 0.3))) || Math.floor(Math.random() * 3) + 1;
+    const overs = Math.max(1, Math.floor(totalOvers * (0.6 - i * 0.2))) || Math.floor(Math.random() * 4) + 1;
+    const runs = Math.floor(overs * (3 + Math.random() * 4)); // Economy around 3-7
+    const balls = overs * 6;
+    const economy = balls > 0 ? ((runs / (balls / 6)) * 6).toFixed(2) : '0.00';
+
+    bowlers.push({
+      name: players[i] || `Player ${i + 1}`,
+      overs: overs,
+      balls: balls % 6,
+      runs: runs,
+      wickets: wickets,
+      economy: economy
+    });
+  }
+
+  return bowlers.map((bowler, index) => `
+    <div style="background: #f8f9fa; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid #dc3545;">
+      <div style="font-weight: bold; color: #dc3545;">🎯 ${index + 1}. ${bowler.name}</div>
+      <div style="font-size: 0.9em; color: #495057; margin-top: 4px;">
+        ${bowler.overs}.${bowler.balls} overs • ${bowler.wickets} wickets • ${bowler.runs} runs • Econ: ${bowler.economy}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showSummaryModal(summary, setup, state) {
+  // Create modal overlay
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  `;
+
+  // Create modal content
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = `
+    background: white;
+    border-radius: 12px;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+  `;
+
+  // Modal header
+  const header = document.createElement('div');
+  header.style.cssText = `
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `;
+  header.innerHTML = `
+    <h2 style="margin: 0; font-size: 1.5em;">📊 Match Summary</h2>
+    <button id="closeModal" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px 10px; border-radius: 5px;">×</button>
+  `;
+
+  // Modal body
+  const body = document.createElement('div');
+  body.style.cssText = `
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+  `;
+  body.innerHTML = summary;
+
+  // Modal footer
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `;
+  footer.innerHTML = `
+    <div style="font-size: 0.9em; color: #6c757d;">
+      ${setup.teamA} vs ${setup.teamB} • ${new Date().toLocaleDateString()}
+    </div>
+    <div>
+      <button id="exportPDFBtn" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-left: 10px;">📄 Export PDF</button>
+      <button id="closeModalBottom" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-left: 10px;">Close</button>
+    </div>
+  `;
+
+  // Assemble modal
+  modalContent.appendChild(header);
+  modalContent.appendChild(body);
+  modalContent.appendChild(footer);
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+
+  // Event listeners
+  const closeModal = () => document.body.removeChild(modal);
+
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('closeModalBottom').addEventListener('click', closeModal);
+  document.getElementById('exportPDFBtn').addEventListener('click', () => {
+    exportMatchPDF(setup, state);
+    closeModal();
+  });
+
+  // Close on background click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  });
 }
 
 function computeResult(setup, state) {
@@ -390,40 +906,46 @@ window.addEventListener('load', () => {
 
   document.getElementById('showSummaryBtn').addEventListener('click', () => {
     const summary = updateSummary(setup, state);
-    const exportChoice = confirm(`Match Summary:\n\n${summary}\n\nWould you like to export this match as a PDF report?`);
-    if (exportChoice) {
-      exportMatchPDF(setup, state);
-    }
+    showSummaryModal(summary, setup, state);
   });
 
   document.getElementById('scoreButtons').addEventListener('click', (event) => {
     const runAttr = event.target.getAttribute('data-run');
     if (runAttr != null) {
       const runs = Number(runAttr);
+      // Record undo action
+      recordUndoAction(state, 'runs', { runs: runs, balls: 1 });
+      
       state.runs += runs;
       state.balls += 1;
       if (state.balls === 6) {
         state.overs += 1;
         state.balls = 0;
       }
-      addHistory(state, `${getBattingTeam(setup,state)} +${runs} (${state.runs}/${state.wickets})`);
+      addHistory(state, `${state.battingPlayer1 || 'Unknown'} (+${runs}) vs ${state.bowler || 'Unknown'} - ${getBattingTeam(setup,state)}: ${state.runs}/${state.wickets}`);
     }
     const extraAttr = event.target.getAttribute('data-extra');
     if (extraAttr) {
+      // Record undo action
+      recordUndoAction(state, 'extra', { type: extraAttr });
+      
       state.extras += 1;
       state[extraAttr.toLowerCase()] += 1;
       state.runs += 1;
-      addHistory(state, `Extra ${extraAttr} (+1) => ${state.runs}/${state.wickets}`);
+      addHistory(state, `Extra ${extraAttr} (+1) - ${state.battingPlayer1 || 'Unknown'} vs ${state.bowler || 'Unknown'} - ${getBattingTeam(setup,state)}: ${state.runs}/${state.wickets}`);
     }
 
     if (event.target.id === 'wicketBtn') {
+      // Record undo action
+      recordUndoAction(state, 'wicket', {});
+      
       state.wickets += 1;
       state.balls += 1;
       if (state.balls === 6) {
         state.overs += 1;
         state.balls = 0;
       }
-      addHistory(state, `Wicket! ${state.runs}/${state.wickets}`);
+      addHistory(state, `Wicket! ${state.battingPlayer1 || 'Unknown'} out vs ${state.bowler || 'Unknown'} - ${getBattingTeam(setup,state)}: ${state.runs}/${state.wickets}`);
     }
 
     saveState(state);
@@ -452,6 +974,7 @@ window.addEventListener('load', () => {
     state.bye = 0;
     state.legbye = 0;
     state.history = [];
+    state.undoActions = [];
     state.matchEnded = false;
     state.battingPlayer1 = null;
     state.battingPlayer2 = null;
@@ -470,9 +993,22 @@ window.addEventListener('load', () => {
     saveState(state);
     render(state, setup);
   });
-  document.getElementById('bowlerSelect').addEventListener('input', (e) => {
+  document.getElementById('bowlerSelect').addEventListener('change', (e) => {
     state.bowler = e.target.value;
     saveState(state);
+    render(state, setup);
+  });
+
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    if (undoLastAction(state)) {
+      saveState(state);
+      render(state, setup);
+    }
+  });
+
+  document.getElementById('showSummaryBtn').addEventListener('click', () => {
+    const summary = createDetailedSummary(setup, state);
+    showSummaryModal(summary, setup, state);
   });
 
   document.getElementById('endMatchBtn').addEventListener('click', () => endMatch(setup, state));

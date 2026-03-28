@@ -32,7 +32,9 @@
         </div>
         <div>
           <label class="small" for="bowlerSelect">Bowler:</label>
-          <input type="text" id="bowlerSelect" class="player-input" placeholder="Enter bowler name" />
+          <select id="bowlerSelect" class="player-input">
+            <option value="">Select bowler...</option>
+          </select>
         </div>
       </div>
       <div class="scoreline" id="scoreText">0/0</div>
@@ -69,6 +71,7 @@
       <div class="actions">
         <button id="exportDataBtn" class="btn-primary">Export Match Data (JSON)</button>
         <button id="showSummaryBtn" class="btn-primary">Show Match Summary</button>
+        <button id="undoBtn" class="btn-warning">Undo Last Change</button>
         <button id="switchInningsBtn" class="btn-secondary">Switch Innings</button>
         <button id="endMatchBtn" class="btn-danger">End Match</button>
       </div>
