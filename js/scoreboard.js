@@ -201,7 +201,7 @@ function endMatch(setup, state) {
     finalResult: computeResult(setup, state),
   };
   localStorage.setItem('cricketResult', JSON.stringify(result));
-  window.location.href = 'controller_result.html';
+  window.location.href = 'scorer_result.html';
 }
 
 function checkScorerPassword() {

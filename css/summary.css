@@ -58,6 +58,53 @@ h1 {
   100% { opacity: 1; }
 }
 
+@media (max-width: 600px) {
+  .app {
+    padding: 10px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .card {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .scoreline.large {
+    font-size: 2.5em;
+    margin: 15px 0;
+  }
+  
+  .status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 5px;
+  }
+  
+  h1 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  .scoreline.large {
+    font-size: 2em;
+    margin: 10px 0;
+  }
+}
+
 .extras {
   text-align: center;
   font-size: 0.9em;

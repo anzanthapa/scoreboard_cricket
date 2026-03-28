@@ -74,7 +74,7 @@ function saveSetup() {
     matchEnded: false,
   };
   localStorage.setItem('cricketState', JSON.stringify(initialGame));
-  window.location.href = 'controller_scoreboard.html';
+  window.location.href = 'scorer_scoreboard.html';
 }
 
 function validateTeamName(input) {
@@ -113,6 +113,24 @@ function checkAndResetDailyData() {
 
 window.addEventListener('load', () => {
   checkAndResetDailyData();
+
+  // Password visibility toggles
+  const toggleScorerPassword = document.getElementById('toggleScorerPassword');
+  const toggleViewerPassword = document.getElementById('toggleViewerPassword');
+  const scorerPasswordInput = document.getElementById('scorerPassword');
+  const viewerPasswordInput = document.getElementById('viewerPassword');
+
+  toggleScorerPassword.addEventListener('click', () => {
+    const isPassword = scorerPasswordInput.type === 'password';
+    scorerPasswordInput.type = isPassword ? 'text' : 'password';
+    toggleScorerPassword.textContent = isPassword ? '🙈' : '👁️';
+  });
+
+  toggleViewerPassword.addEventListener('click', () => {
+    const isPassword = viewerPasswordInput.type === 'password';
+    viewerPasswordInput.type = isPassword ? 'text' : 'password';
+    toggleViewerPassword.textContent = isPassword ? '🙈' : '👁️';
+  });
   createPlayerInputs('teamAPlayers', 'A');
   createPlayerInputs('teamBPlayers', 'B');
   setFirstBattingButton('A');

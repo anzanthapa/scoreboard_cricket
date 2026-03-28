@@ -27,12 +27,18 @@
       </div>
       <div style="margin-top:16px;">
         <label for="scorerPassword">Scorer Password</label>
-        <input type="password" id="scorerPassword" class="player-input" placeholder="Password for match scorer access" />
+        <div style="position: relative;">
+          <input type="password" id="scorerPassword" class="player-input" placeholder="Password for match scorer access" style="padding-right: 40px;" />
+          <button type="button" id="toggleScorerPassword" style="position: absolute; right: 10px; top: 30%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
+        </div>
         <small style="color:#666;">Required to access scoring controls and continue matches</small>
       </div>
       <div style="margin-top:12px;">
         <label for="viewerPassword">Viewer Password</label>
-        <input type="password" id="viewerPassword" class="player-input" placeholder="Password for match viewers" />
+        <div style="position: relative;">
+          <input type="password" id="viewerPassword" class="player-input" placeholder="Password for match viewers" style="padding-right: 40px;" />
+          <button type="button" id="toggleViewerPassword" style="position: absolute; right: 10px; top: 30%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
+        </div>
         <small style="color:#666;">Required for spectators to view the match summary</small>
       </div>
     </div>

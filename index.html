@@ -65,7 +65,7 @@
       <p id="controllerDesc">You score the match - set up teams, record runs, manage innings, and share with viewers.</p>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <a id="startBtn" href="match_setup.html" class="btn-role">Start Match</a>
-        <a id="continueBtn" href="controller_scoreboard.html" class="btn-role">Continue Match</a>
+        <a id="continueBtn" href="scorer_scoreboard.html" class="btn-role">Continue Match</a>
       </div>
     </div>
 
@@ -123,7 +123,7 @@
         startBtn.style.display = 'inline-block';
         continueBtn.style.display = 'inline-block';
         continueBtn.classList.remove('disabled');
-        continueBtn.href = 'controller_scoreboard.html';
+        continueBtn.href = 'scorer_scoreboard.html';
       } else if (setup) {
         // Setup exists but no match started
         const setupData = JSON.parse(setup);
@@ -136,7 +136,7 @@
         startBtn.style.display = 'inline-block';
         continueBtn.style.display = 'inline-block';
         continueBtn.classList.remove('disabled');
-        continueBtn.href = 'controller_scoreboard.html';
+        continueBtn.href = 'scorer_scoreboard.html';
       } else {
         // No setup
         document.getElementById('status').innerHTML = `
