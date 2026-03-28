@@ -3,93 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cricket Scoreboard</title>
+  <title>Cricket Scoreboard System</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .role-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin: 20px 0;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .role-card h2 {
+      margin-top: 0;
+      font-size: 2em;
+    }
+    .role-card p {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+    }
+    .btn-role {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid white;
+      padding: 15px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-size: 1.2em;
+      transition: all 0.3s ease;
+      display: inline-block;
+      margin: 10px;
+    }
+    .btn-role:hover {
+      background: white;
+      color: #667eea;
+      transform: translateY(-2px);
+    }
+    .btn-role.disabled {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+      cursor: not-allowed;
+      border-color: rgba(255,255,255,0.3);
+    }
+    .status {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 1.1em;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
-    <h1>Cricket Scoreboard</h1>
+    <h1>🏏 Cricket Scoreboard System</h1>
+    <div id="status" class="status"></div>
 
-    <div id="setupCard" class="card" style="margin-top:16px;">
-      <h3>Match Setup</h3>
-      <div class="grid2" style="text-align:center; margin-bottom:8px;">
-        <div>
-          <label for="teamAInput" class="small">Team A</label>
-          <input type="text" id="teamAInput" value="Team A" class="player-input" />
-        </div>
-        <div>
-          <label for="teamBInput" class="small">Team B</label>
-          <input type="text" id="teamBInput" value="Team B" class="player-input" />
-        </div>
-      </div>
-      <div class="status" style="justify-content:center; margin-bottom:12px;">
-        <span class="small" style="margin-right:10px;">First batting:</span>
-        <button id="chooseBatA" class="btn-secondary" type="button">🏏 Team A</button>
-        <button id="chooseBatB" class="btn-secondary" type="button">🏏 Team B</button>
-      </div>
-      <div class="grid2">
-        <div id="teamAPlayers" class="card" style="padding:10px; background:#eef4ff; text-align:center;">
-          <h4 id="teamAHeader" style="margin:4px 0 8px;">Team A</h4>
-          <div id="teamAPlayerFields"></div>
-        </div>
-        <div id="teamBPlayers" class="card" style="padding:10px; background:#eef4ff; text-align:center;">
-          <h4 id="teamBHeader" style="margin:4px 0 8px;">Team B</h4>
-          <div id="teamBPlayerFields"></div>
-        </div>
-      </div>
-      <div style="margin-top:10px; text-align:center;">
-        <button id="newMatchBtn" class="btn-primary full-width" style="max-width:240px;">Start / Reset match</button>
+    <div class="role-card">
+      <h2>🎮 Match Scorer</h2>
+      <p id="controllerDesc">You score the match - set up teams, record runs, manage innings, and share with viewers.</p>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <a id="startBtn" href="match_setup.html" class="btn-role">Start Match</a>
+        <a id="continueBtn" href="controller_scoreboard.html" class="btn-role">Continue Match</a>
       </div>
     </div>
 
-    <div id="matchPanel" class="grid2" style="margin-top:16px; display:none;">
-      <div class="card" id="battingCard">
-        <div class="status">
-          <span>Innings:</span><span id="inningsText">1</span>
-          <span style="margin-left:auto;">Overs:</span><span id="oversText">0.0</span>
-        </div>
-        <div class="scoreline" id="scoreText">0/0</div>
-        <div class="small">Extras: <span id="extrasText">0</span> &nbsp;&nbsp; Wides: <span id="widesCount">0</span>  NoBalls: <span id="noballsCount">0</span>  Byes: <span id="byesCount">0</span>  LegByes: <span id="legbyesCount">0</span></div>
-        <div class="small">Runs: <span id="runsText">0</span> &nbsp; Wickets: <span id="wicketsText">0</span></div>
-
-        <div class="actions" id="scoreButtons">
-          <button class="btn-secondary" data-run="0">Dot</button>
-          <button class="btn-secondary" data-run="1">1</button>
-          <button class="btn-secondary" data-run="2">2</button>
-          <button class="btn-secondary" data-run="3">3</button>
-          <button class="btn-secondary" data-run="4">4</button>
-          <button class="btn-secondary" data-run="5">5</button>
-          <button class="btn-secondary" data-run="6">6</button>
-          <button class="btn-warning" id="wicketBtn">Wicket</button>
-        </div>
-
-        <div class="actions" style="border-top:1px dashed #cdd9ec; padding-top:8px; margin-top:8px;">
-          <button class="btn-primary" data-extra="WIDE">Wide +1</button>
-          <button class="btn-primary" data-extra="NOBALL">No-ball +1</button>
-          <button class="btn-primary" data-extra="BYE">Bye +1</button>
-          <button class="btn-primary" data-extra="LEG_BYE">Leg bye +1</button>
-        </div>
-
-        <div class="actions" style="border-top:1px dashed #cdd9ec; padding-top:8px; margin-top:8px;">
-          <button class="btn-danger" id="undoBtn">Undo last action</button>
-          <button class="btn-secondary" id="endOverBtn">Complete over</button>
-          <button class="btn-warning" id="swapInningsBtn">Switch innings</button>
-          <button class="btn-warning" id="endMatchBtn">End match</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Current Match Summary</h3>
-        <ul class="history" id="historyList"></ul>
-      </div>
+    <div class="role-card">
+      <h2>👁️ Match Viewer</h2>
+      <p id="viewerDesc">Watch live match updates with a clean summary interface (password required). Ask the Scorer for the viewer's password.</p>
+      <p style="font-size: 0.9em; color: #888; margin: 10px 0;"><em>Ask the Scorer for the viewer's password to access the match summary.</em></p>
+      <a id="viewerBtn" href="viewer_scoreboard.html" class="btn-role">View Match Summary</a>
     </div>
 
-    <div id="matchResultCard" class="card" style="margin-top:16px; display:none;">
-      <h3>Match result</h3>
-      <p id="resultText" class="small">Match is not finished yet.</p>
+    <div style="text-align: center; margin-top: 40px; color: #666;">
+      <p><strong>How it works:</strong></p>
+      <p>1. Scorer creates a match with separate passwords for scorer and viewer access</p>
+      <p>2. Scorer shares the viewer password with spectators</p>
+      <p>3. Everyone uses their passwords to access appropriate features</p>
     </div>
   </div>
 
-  <script src="js/app.js"></script>
+  <script>
+    function checkAndResetDailyData() {
+      const today = new Date().toDateString();
+      const lastReset = localStorage.getItem('cricketLastReset');
+
+      if (lastReset !== today) {
+        // Clear all cricket data
+        localStorage.removeItem('cricketSetup');
+        localStorage.removeItem('cricketState');
+        localStorage.removeItem('cricketResult');
+        localStorage.setItem('cricketLastReset', today);
+      }
+    }
+
+    function updateInterface() {
+      const setup = localStorage.getItem('cricketSetup');
+      const state = localStorage.getItem('cricketState');
+
+      const startBtn = document.getElementById('startBtn');
+      const continueBtn = document.getElementById('continueBtn');
+
+      if (setup && state) {
+        // Match in progress
+        const setupData = JSON.parse(setup);
+        const stateData = JSON.parse(state);
+        const teamA = setupData.teamA;
+        const teamB = setupData.teamB;
+        const score = `${stateData.runs}/${stateData.wickets}`;
+        const overs = `${Math.floor(stateData.overs)}.${stateData.balls}`;
+
+        document.getElementById('status').innerHTML = `
+          <strong>🔴 LIVE MATCH:</strong> ${teamA} vs ${teamB}<br>
+          <strong>Score:</strong> ${score} | <strong>Overs:</strong> ${overs}
+        `;
+
+        document.getElementById('controllerDesc').textContent = 'Continue the live match or start a new one.';
+        startBtn.style.display = 'inline-block';
+        continueBtn.style.display = 'inline-block';
+        continueBtn.classList.remove('disabled');
+        continueBtn.href = 'controller_scoreboard.html';
+      } else if (setup) {
+        // Setup exists but no match started
+        const setupData = JSON.parse(setup);
+        document.getElementById('status').innerHTML = `
+          <strong>⚽ MATCH READY:</strong> ${setupData.teamA} vs ${setupData.teamB}<br>
+          Teams configured, ready to start scoring.
+        `;
+
+        document.getElementById('controllerDesc').textContent = 'Start scoring the configured match or set up a new one.';
+        startBtn.style.display = 'inline-block';
+        continueBtn.style.display = 'inline-block';
+        continueBtn.classList.remove('disabled');
+        continueBtn.href = 'controller_scoreboard.html';
+      } else {
+        // No setup
+        document.getElementById('status').innerHTML = `
+          <strong>⚾ NO MATCH ACTIVE</strong>
+        `;
+
+        document.getElementById('controllerDesc').textContent = 'Set up teams and players to start a new match.';
+        startBtn.style.display = 'inline-block';
+        continueBtn.style.display = 'none';
+
+        document.getElementById('viewerDesc').textContent = 'No match available to view right now. Ask the Scorer for the viewer\'s password when a match is active.';
+        document.getElementById('viewerBtn').textContent = 'No Match Available';
+        document.getElementById('viewerBtn').classList.add('disabled');
+        document.getElementById('viewerBtn').href = '#';
+      }
+    }
+
+    // Update on load
+    checkAndResetDailyData();
+    updateInterface();
+
+    // Auto-refresh status every 5 seconds
+    setInterval(updateInterface, 5000);
+  </script>
+
+  <footer style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); color: #666; margin-top: 40px;">
+    <p>&copy; 2026 ANZAN. All rights reserved.</p>
+  </footer>
 </body>
 </html>

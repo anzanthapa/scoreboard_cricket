@@ -39,6 +39,13 @@ function saveSetup() {
   const teamA = document.getElementById('teamAInput').value.trim() || 'Team A';
   const teamB = document.getElementById('teamBInput').value.trim() || 'Team B';
   const firstBatting = document.getElementById('firstBatA').classList.contains('btn-active') ? 'A' : 'B';
+  const scorerPassword = document.getElementById('scorerPassword').value.trim();
+  const viewerPassword = document.getElementById('viewerPassword').value.trim();
+
+  if (!scorerPassword || !viewerPassword) {
+    alert('Please create both scorer and viewer passwords to protect access.');
+    return;
+  }
 
   const setup = {
     teamA,
@@ -46,6 +53,8 @@ function saveSetup() {
     firstBatting,
     playersA: getPlayers('A'),
     playersB: getPlayers('B'),
+    scorerPassword,
+    viewerPassword
   };
 
   localStorage.setItem('cricketSetup', JSON.stringify(setup));
@@ -65,13 +74,66 @@ function saveSetup() {
     matchEnded: false,
   };
   localStorage.setItem('cricketState', JSON.stringify(initialGame));
-  window.location.href = 'scoreboard.html';
+  window.location.href = 'controller_scoreboard.html';
+}
+
+function validateTeamName(input) {
+  let value = input.value.replace(/[^a-zA-Z0-9 ]/g, ''); // only letters, numbers, spaces
+  if (value.length > 20) {
+    value = value.substring(0, 20);
+  }
+  input.value = value.trim();
+}
+
+function updateTeamHeader(team, headerId) {
+  const header = document.getElementById(headerId);
+  header.textContent = team || 'Team ' + (headerId === 'teamAHeader' ? 'A' : 'B');
+  updateFirstBatButtons();
+}
+
+function updateFirstBatButtons() {
+  const teamA = document.getElementById('teamAInput').value || 'Team A';
+  const teamB = document.getElementById('teamBInput').value || 'Team B';
+  document.getElementById('firstBatA').innerHTML = `🏏 ${teamA}`;
+  document.getElementById('firstBatB').innerHTML = `🏏 ${teamB}`;
+}
+
+function checkAndResetDailyData() {
+  const today = new Date().toDateString();
+  const lastReset = localStorage.getItem('cricketLastReset');
+
+  if (lastReset !== today) {
+    // Clear all cricket data
+    localStorage.removeItem('cricketSetup');
+    localStorage.removeItem('cricketState');
+    localStorage.removeItem('cricketResult');
+    localStorage.setItem('cricketLastReset', today);
+  }
 }
 
 window.addEventListener('load', () => {
+  checkAndResetDailyData();
   createPlayerInputs('teamAPlayers', 'A');
   createPlayerInputs('teamBPlayers', 'B');
   setFirstBattingButton('A');
+
+  const teamAInput = document.getElementById('teamAInput');
+  const teamBInput = document.getElementById('teamBInput');
+
+  teamAInput.addEventListener('input', () => {
+    validateTeamName(teamAInput);
+    updateTeamHeader(teamAInput.value, 'teamAHeader');
+  });
+
+  teamBInput.addEventListener('input', () => {
+    validateTeamName(teamBInput);
+    updateTeamHeader(teamBInput.value, 'teamBHeader');
+  });
+
+  // Initial update
+  updateTeamHeader(teamAInput.value, 'teamAHeader');
+  updateTeamHeader(teamBInput.value, 'teamBHeader');
+  updateFirstBatButtons();
 
   document.getElementById('firstBatA').addEventListener('click', () => setFirstBattingButton('A'));
   document.getElementById('firstBatB').addEventListener('click', () => setFirstBattingButton('B'));

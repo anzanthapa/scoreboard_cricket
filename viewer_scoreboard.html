@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match Summary</title>
+  <link rel="stylesheet" href="css/summary.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Live Match Summary</h1>
+    <div class="card summary-card">
+      <div class="status" style="justify-content: space-between; font-size: 1.2em;">
+        <span id="matchTeams">Team A vs Team B</span>
+        <span id="liveIndicator" class="live">🔴 LIVE</span>
+      </div>
+      <div class="status" style="justify-content: space-between; padding-top:8px; font-size: 1.1em;">
+        <span>Batting: <strong id="battingTeam">Team A</strong></span>
+        <span>Bowling: <strong id="bowlingTeam">Team B</strong></span>
+      </div>
+      <div class="status" style="justify-content: space-between; padding-top:8px;">
+        <span>Innings: <strong id="inningsText">1</strong></span>
+        <span>Overs: <strong id="oversText">0.0</strong></span>
+      </div>
+      <div class="scoreline large" id="scoreText">0/0</div>
+      <div class="small extras">Extras: <span id="extrasText">0</span> • Wides: <span id="widesText">0</span> • NoBalls: <span id="noballsText">0</span> • Byes: <span id="byesText">0</span> • LegByes: <span id="legbyesText">0</span></div>
+    </div>
+
+    <div class="card commentary-card">
+      <h3>Recent Commentary</h3>
+      <div id="commentaryBox" class="commentary">Match started — no commentary yet.</div>
+    </div>
+
+    <div class="refresh-notice">
+      <p>🔄 Auto-refresh every 15 seconds • <button id="refreshBtn" style="background:none; border:none; color:#667eea; text-decoration:underline; cursor:pointer;">Refresh Now</button></p>
+    </div>
+  </div>
+
+  <script src="js/summary.js"></script>
+
+  <footer style="text-align: center; padding: 20px; background: rgba(0,0,0,0.1); color: #666; margin-top: 40px;">
+    <p>&copy; 2026 ANZAN. All rights reserved.</p>
+  </footer>
+</body>
+</html>

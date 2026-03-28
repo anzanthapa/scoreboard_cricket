@@ -25,17 +25,27 @@
         <button id="firstBatA" class="btn-secondary">🏏 Team A</button>
         <button id="firstBatB" class="btn-secondary">🏏 Team B</button>
       </div>
+      <div style="margin-top:16px;">
+        <label for="scorerPassword">Scorer Password</label>
+        <input type="password" id="scorerPassword" class="player-input" placeholder="Password for match scorer access" />
+        <small style="color:#666;">Required to access scoring controls and continue matches</small>
+      </div>
+      <div style="margin-top:12px;">
+        <label for="viewerPassword">Viewer Password</label>
+        <input type="password" id="viewerPassword" class="player-input" placeholder="Password for match viewers" />
+        <small style="color:#666;">Required for spectators to view the match summary</small>
+      </div>
     </div>
 
     <div class="card" style="margin-top:16px;">
       <h3>Players</h3>
       <div class="grid2" style="text-align:center;">
         <div>
-          <h4>Team A</h4>
+          <h4 id="teamAHeader">Team A</h4>
           <div id="teamAPlayers"></div>
         </div>
         <div>
-          <h4>Team B</h4>
+          <h4 id="teamBHeader">Team B</h4>
           <div id="teamBPlayers"></div>
         </div>
       </div>
@@ -46,5 +56,9 @@
   </div>
 
   <script src="js/setup.js"></script>
+
+  <footer style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); color: #666; margin-top: 40px;">
+    <p>&copy; 2026 ANZAN. All rights reserved.</p>
+  </footer>
 </body>
 </html>

@@ -1,0 +1,111 @@
+/* Summary specific styles */
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.scoreline.large {
+  font-size: 3em;
+  font-weight: bold;
+  text-align: center;
+  color: #2c3e50;
+  margin: 20px 0;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.live {
+  color: #e74c3c;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.extras {
+  text-align: center;
+  font-size: 0.9em;
+  color: #7f8c8d;
+}
+
+.commentary-card {
+  background: #f8f9fa;
+}
+
+.commentary-card h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.commentary {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: monospace;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.refresh-notice {
+  text-align: center;
+  color: white;
+  font-size: 0.9em;
+  margin-top: 20px;
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .app {
+    padding: 10px;
+  }
+
+  .scoreline.large {
+    font-size: 2.5em;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}
