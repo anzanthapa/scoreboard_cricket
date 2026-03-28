@@ -8,74 +8,81 @@
 </head>
 <body>
   <div class="app">
-    <h1>Cricket Scoreboard</h1>
-    <div class="card" id="infoCard">
-      <div class="status" style="justify-content: space-between;">
-        <span id="matchTeams">Team A vs Team B</span>
-      </div>
-      <div class="status" style="justify-content: space-between; padding-top:8px;">
-        <span>Batting: <strong id="battingTeam">Team A</strong></span>
-        <span>Bowling: <strong id="bowlingTeam">Team B</strong></span>
-      </div>
-      <div class="status" style="justify-content: space-between; padding-top:8px;">
-        <span>Innings: <strong id="inningsText">1</strong></span>
-        <span>Overs: <strong id="oversText">0.0</strong></span>
-      </div>
-      <div class="status" style="justify-content: space-between; padding-top:8px;">
-        <div>
-          <label class="small" for="battingPlayer1">Striker:</label>
-          <select id="battingPlayer1" class="player-input"></select>
-        </div>
-        <div>
-          <label class="small" for="battingPlayer2">Non-striker:</label>
-          <select id="battingPlayer2" class="player-input"></select>
-        </div>
-        <div>
-          <label class="small" for="bowlerSelect">Bowler:</label>
-          <select id="bowlerSelect" class="player-input">
-            <option value="">Select bowler...</option>
-          </select>
-        </div>
-      </div>
-      <div class="scoreline" id="scoreText">0/0</div>
-      <div class="small">Extras: <span id="extrasText">0</span> • Wides: <span id="widesText">0</span> • NoBalls: <span id="noballsText">0</span> • Byes: <span id="byesText">0</span> • LegByes: <span id="legbyesText">0</span></div>
+    <div class="top-nav">
+      <a href="index.html" class="btn-nav btn-home">Home</a>
+      <span class="btn-nav active">Cricket Scoreboard</span>
     </div>
+    <main class="scoreboard-main">
+      <section class="scoreboard-content">
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Opening Pair Setup</h3>
+          <div class="status" style="justify-content: space-between; margin-bottom:8px;">
+            <span id="matchTeams">Team A vs Team B</span>
+          </div>
+          <div class="status" style="justify-content: space-between; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+            <div style="flex:1 1 100%; min-width:220px;"> 
+              <label class="small">Opening Pair</label>
+              <div id="openingPair" style="font-weight:700;">-</div>
+            </div>
 
-    <div class="card" style="margin-top:16px;">
-      <h3>Scoring Controls</h3>
-      <div class="actions" id="scoreButtons">
-        <button class="btn-secondary" data-run="0">Dot</button>
-        <button class="btn-secondary" data-run="1">1</button>
-        <button class="btn-secondary" data-run="2">2</button>
-        <button class="btn-secondary" data-run="3">3</button>
-        <button class="btn-secondary" data-run="4">4</button>
-        <button class="btn-secondary" data-run="5">5</button>
-        <button class="btn-secondary" data-run="6">6</button>
-        <button class="btn-warning" id="wicketBtn">Wicket</button>
-      </div>
-      <div class="actions" style="margin-top:10px;">
-        <button class="btn-primary" data-extra="WIDE">Wide</button>
-        <button class="btn-primary" data-extra="NOBALL">No-ball</button>
-        <button class="btn-primary" data-extra="BYE">Bye</button>
-        <button class="btn-primary" data-extra="LEG_BYE">Leg bye</button>
-      </div>
-    </div>
+            <div style="flex:1 1 30%; min-width:220px;">
+              <label class="small" for="battingPlayer1">Striker</label>
+              <select id="battingPlayer1" class="player-input"></select>
+            </div>
+            <div style="flex:1 1 30%; min-width:220px;">
+              <label class="small" for="battingPlayer2">Non-striker</label>
+              <select id="battingPlayer2" class="player-input"></select>
+            </div>
+            <div style="flex:1 1 30%; min-width:220px;">
+              <label class="small" for="bowlerSelect">Bowler</label>
+              <select id="bowlerSelect" class="player-input"></select>
+            </div>
+          </div>
+          <div class="status" style="justify-content: space-between; margin-bottom: 8px;">
+            <button id="startMatchBtn" class="btn-primary">Let’s Go!</button>
+            <span id="matchStatus" style="font-weight: 600; color: #1c7ed6;">Awaiting match start</span>
+          </div>
+        </div>
 
-    <div class="card" style="margin-top:16px;">
-      <h3>Last 2 overs commentary</h3>
-      <div id="commentaryBox" class="small">Match started — no commentary yet.</div>
-    </div>
+        <div class="card" id="scorerControlCenter" style="margin-bottom:16px;">
+          <h3>Score Control Center</h3>
+          <div class="status" style="justify-content: space-between; padding-top:8px;">
+            <span>Innings: <strong id="inningsText">1</strong></span>
+            <span>Overs: <strong id="oversText">0.0</strong></span>
+          </div>
+          <div class="scoreline" id="scoreText">0/0</div>
+          <div class="small">Extras: <span id="extrasText">0</span> • Wides: <span id="widesText">0</span> • NoBalls: <span id="noballsText">0</span> • Byes: <span id="byesText">0</span> • LegByes: <span id="legbyesText">0</span></div>
+          <div id="scoreButtons" class="actions" style="margin-top:12px; flex-wrap:wrap; gap:8px;">
+            <button class="btn-secondary" data-run="1">1</button>
+            <button class="btn-secondary" data-run="2">2</button>
+            <button class="btn-secondary" data-run="3">3</button>
+            <button class="btn-secondary" data-run="4">4</button>
+            <button class="btn-secondary" data-run="6">6</button>
+            <button class="btn-secondary" data-run="0">Dot</button>
+            <button class="btn-warning" id="wicketBtn">Wicket</button>
+            <button class="btn-primary" data-extra="WIDE">Wide</button>
+            <button class="btn-primary" data-extra="NOBALL">No-ball</button>
+            <button class="btn-primary" data-extra="BYE">Bye</button>
+            <button class="btn-primary" data-extra="LEG_BYE">Leg bye</button>
+            <button id="undoBtn" class="btn-warning">Undo Last Change</button>
+          </div>
+        </div>
 
-    <div class="card" style="margin-top:16px;">
-      <h3>Match Controls</h3>
-      <div class="actions">
-        <button id="exportDataBtn" class="btn-primary">Export Match Data (JSON)</button>
-        <button id="showSummaryBtn" class="btn-primary">Show Match Summary</button>
-        <button id="undoBtn" class="btn-warning">Undo Last Change</button>
-        <button id="switchInningsBtn" class="btn-secondary">Switch Innings</button>
-        <button id="endMatchBtn" class="btn-danger">End Match</button>
-      </div>
-    </div>
+        <div class="card" style="margin-top:16px;">
+          <h3>Last 2 overs commentary</h3>
+          <div id="commentaryBox" class="small">Match started • no commentary yet.</div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <h3>Match Controls</h3>
+          <div class="actions">
+            <button id="switchInningsBtn" class="btn-secondary">Switch Innings</button>
+            <button id="showSummaryBtn" class="btn-primary">Show Match Summary</button>
+            <button id="endMatchBtn" class="btn-danger">End Match</button>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

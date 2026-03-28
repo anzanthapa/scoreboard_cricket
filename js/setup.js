@@ -1,16 +1,70 @@
-function createPlayerInputs(containerId, prefix) {
+const DEFAULT_PLAYERS = 11;
+const MIN_PLAYERS = 1;
+const MAX_PLAYERS = 20;
+const playerCounts = {
+  A: DEFAULT_PLAYERS,
+  B: DEFAULT_PLAYERS,
+};
+
+function createPlayerInputs(containerId, prefix, count, existingNames = []) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
-  for (let i = 1; i <= 15; i += 1) {
+  for (let i = 1; i <= count; i += 1) {
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.marginBottom = '4px';
+
     const input = document.createElement('input');
     input.type = 'text';
     input.id = `${prefix}-player-${i}`;
-    input.value = `${prefix}${i}`;
+    input.value = (existingNames[i - 1] && existingNames[i - 1].trim())
+      ? existingNames[i - 1].trim()
+      : `${prefix}${i}`;
     input.className = 'player-input';
-    input.style.marginBottom = '4px';
-    input.style.width = '100%';
+    input.style.flex = '1';
     input.style.boxSizing = 'border-box';
-    container.appendChild(input);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = '–';
+    removeBtn.title = 'Remove this player';
+    removeBtn.style.marginLeft = '8px';
+    removeBtn.style.width = '32px';
+    removeBtn.style.height = '32px';
+    removeBtn.style.cursor = 'pointer';
+    removeBtn.addEventListener('click', () => {
+      if (playerCounts[prefix] > MIN_PLAYERS) {
+        const currentNames = getPlayers(prefix);
+        currentNames.splice(i - 1, 1);
+        setPlayerCount(prefix, playerCounts[prefix] - 1, currentNames);
+      } else {
+        alert(`At least ${MIN_PLAYERS} players required`);
+      }
+    });
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    container.appendChild(wrapper);
+  }
+}
+
+function getPlayers(prefix) {
+  const container = document.getElementById(`team${prefix}Players`);
+  if (!container) {
+    return [];
+  }
+  const inputs = container.querySelectorAll('input');
+  return Array.from(inputs).map((input, idx) => {
+    const value = input.value.trim();
+    return value || `${prefix}${idx + 1}`;
+  });
+}
+
+function updatePlayerCountDisplay(prefix) {
+  const countEl = document.getElementById(`team${prefix}PlayerCount`);
+  if (countEl) {
+    countEl.textContent = `${playerCounts[prefix]} player${playerCounts[prefix] === 1 ? '' : 's'}`;
   }
 }
 
@@ -26,13 +80,27 @@ function setFirstBattingButton(selected) {
   }
 }
 
-function getPlayers(prefix) {
-  const players = [];
-  for (let i = 1; i <= 15; i += 1) {
-    const input = document.getElementById(`${prefix}-player-${i}`);
-    players.push(input.value.trim() || `${prefix}${i}`);
+function setPlayerCount(prefix, value, existingNames) {
+  playerCounts[prefix] = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, value));
+  const names = existingNames || getPlayers(prefix);
+  createPlayerInputs(`team${prefix}Players`, prefix, playerCounts[prefix], names);
+  updatePlayerCountDisplay(prefix);
+}
+
+function addPlayer(prefix) {
+  if (playerCounts[prefix] < MAX_PLAYERS) {
+    setPlayerCount(prefix, playerCounts[prefix] + 1);
+  } else {
+    alert(`Maximum ${MAX_PLAYERS} players allowed`);
   }
-  return players;
+}
+
+function removePlayer(prefix) {
+  if (playerCounts[prefix] > MIN_PLAYERS) {
+    setPlayerCount(prefix, playerCounts[prefix] - 1);
+  } else {
+    alert(`At least ${MIN_PLAYERS} players required`);
+  }
 }
 
 function saveSetup() {
@@ -116,26 +184,22 @@ function checkAndResetDailyData() {
 window.addEventListener('load', () => {
   checkAndResetDailyData();
 
-  // Password visibility toggles
-  const toggleScorerPassword = document.getElementById('toggleScorerPassword');
-  const toggleViewerPassword = document.getElementById('toggleViewerPassword');
+  // Password inputs are shown as text to stay visible on one line
   const scorerPasswordInput = document.getElementById('scorerPassword');
   const viewerPasswordInput = document.getElementById('viewerPassword');
 
-  toggleScorerPassword.addEventListener('click', () => {
-    const isPassword = scorerPasswordInput.type === 'password';
-    scorerPasswordInput.type = isPassword ? 'text' : 'password';
-    toggleScorerPassword.textContent = isPassword ? '🙈' : '👁️';
-  });
-
-  toggleViewerPassword.addEventListener('click', () => {
-    const isPassword = viewerPasswordInput.type === 'password';
-    viewerPasswordInput.type = isPassword ? 'text' : 'password';
-    toggleViewerPassword.textContent = isPassword ? '🙈' : '👁️';
-  });
-  createPlayerInputs('teamAPlayers', 'A');
-  createPlayerInputs('teamBPlayers', 'B');
+  scorerPasswordInput.type = 'text';
+  viewerPasswordInput.type = 'text';
+  createPlayerInputs('teamAPlayers', 'A', playerCounts.A);
+  createPlayerInputs('teamBPlayers', 'B', playerCounts.B);
+  updatePlayerCountDisplay('A');
+  updatePlayerCountDisplay('B');
   setFirstBattingButton('A');
+
+  document.getElementById('teamAAdd').addEventListener('click', () => addPlayer('A'));
+  document.getElementById('teamARemove').addEventListener('click', () => removePlayer('A'));
+  document.getElementById('teamBAdd').addEventListener('click', () => addPlayer('B'));
+  document.getElementById('teamBRemove').addEventListener('click', () => removePlayer('B'));
 
   const teamAInput = document.getElementById('teamAInput');
   const teamBInput = document.getElementById('teamBInput');

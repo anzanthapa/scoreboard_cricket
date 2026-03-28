@@ -4,14 +4,33 @@ function loadSetup() {
     window.location.href = 'match_setup.html';
     return null;
   }
-  return JSON.parse(raw);
+
+  const setup = JSON.parse(raw);
+  setup.teamA = (setup.teamA || 'Team A').toString().trim() || 'Team A';
+  setup.teamB = (setup.teamB || 'Team B').toString().trim() || 'Team B';
+  setup.firstBatting = setup.firstBatting === 'B' ? 'B' : 'A';
+  setup.playersA = sanitizeTeamPlayers(setup.playersA);
+  setup.playersB = sanitizeTeamPlayers(setup.playersB);
+
+  if (setup.playersA.length === 0) {
+    setup.playersA = Array.from({ length: 11 }, (_, i) => `A${i + 1}`);
+  }
+  if (setup.playersB.length === 0) {
+    setup.playersB = Array.from({ length: 11 }, (_, i) => `B${i + 1}`);
+  }
+
+  // Ensure the squad is always available in storage
+  localStorage.setItem('cricketSetup', JSON.stringify(setup));
+
+  return setup;
 }
 
 function loadState() {
   const raw = localStorage.getItem('cricketState');
   const state = raw ? JSON.parse(raw) : null;
-  if (state && !state.undoActions) {
-    state.undoActions = [];
+  if (state) {
+    if (!state.undoActions) state.undoActions = [];
+    if (state.matchStarted === undefined) state.matchStarted = false;
   }
   return state;
 }
@@ -147,44 +166,57 @@ function generateTopBowlers(inningsRecord, setup, inningsIndex) {
     });
   }
 
+  return bowlingPlayers;
+}
+
 function currentBattingPlayers(setup, state) {
   const battingTeam = getBattingTeam(setup, state);
-  const players = setup.firstBatting === 'A' ? setup.playersA : setup.playersB;
-  const other = setup.firstBatting === 'A' ? setup.playersB : setup.playersA;
-
-  if (state.innings === 2) {
-    if (setup.firstBatting === 'A') return setup.playersB;
-    return setup.playersA;
-  }
-  return players;
+  const players = battingTeam === setup.teamA ? setup.playersA : setup.playersB;
+  return sanitizeTeamPlayers(players);
 }
 
 function currentBowlingPlayers(setup, state) {
-  if (state.innings === 1) {
-    return setup.firstBatting === 'A' ? setup.playersB : setup.playersA;
-  }
-  return setup.firstBatting === 'A' ? setup.playersA : setup.playersB;
+  const bowlingTeam = getBowlingTeam(setup, state);
+  const players = bowlingTeam === setup.teamA ? setup.playersA : setup.playersB;
+  return sanitizeTeamPlayers(players);
 }
 
 function setPlayerControls(setup, state) {
-  const battingPlayers = currentBattingPlayers(setup, state);
-  const bowlingPlayers = currentBowlingPlayers(setup, state);
+  if (!Array.isArray(setup.playersA) || setup.playersA.length === 0) {
+    setup.playersA = Array.from({ length: 11 }, (_, i) => `A${i + 1}`);
+  }
+  if (!Array.isArray(setup.playersB) || setup.playersB.length === 0) {
+    setup.playersB = Array.from({ length: 11 }, (_, i) => `B${i + 1}`);
+  }
+
+  // Persist corrected setup so it survives refresh.
+  localStorage.setItem('cricketSetup', JSON.stringify(setup));
+
+  let battingPlayers = currentBattingPlayers(setup, state);
+  let bowlingPlayers = currentBowlingPlayers(setup, state);
+
+  if (battingPlayers.length === 0) {
+    battingPlayers = setup.firstBatting === 'A' ? setup.playersA : setup.playersB;
+  }
+  if (bowlingPlayers.length === 0) {
+    bowlingPlayers = setup.firstBatting === 'A' ? setup.playersB : setup.playersA;
+  }
 
   const b1 = document.getElementById('battingPlayer1');
   const b2 = document.getElementById('battingPlayer2');
   const bowler = document.getElementById('bowlerSelect');
 
-  const fillSelect = (el, list, selected) => {
+  const fillSelect = (el, list, selected, placeholder) => {
     el.innerHTML = '';
-    // Add default option for bowler
-    if (el.id === 'bowlerSelect') {
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = '';
-      defaultOpt.text = 'Select bowler...';
-      el.appendChild(defaultOpt);
+    if (placeholder) {
+      const placeholderOpt = document.createElement('option');
+      placeholderOpt.value = '';
+      placeholderOpt.text = placeholder;
+      placeholderOpt.disabled = true;
+      placeholderOpt.selected = !selected;
+      el.appendChild(placeholderOpt);
     }
-    
-    list.forEach((p, idx) => {
+    list.forEach((p) => {
       const opt = document.createElement('option');
       opt.value = p;
       opt.text = p;
@@ -193,26 +225,71 @@ function setPlayerControls(setup, state) {
     });
   };
 
-  // Set default values if not set
-  if (!state.battingPlayer1) state.battingPlayer1 = battingPlayers[0] || '';
-  if (!state.battingPlayer2) state.battingPlayer2 = battingPlayers[1] || battingPlayers[0] || '';
-  if (!state.bowler) state.bowler = '';
+  // Keep selection based on user choices, not auto-reset opening list
+  if (!battingPlayers.includes(state.battingPlayer1)) state.battingPlayer1 = '';
+  if (!battingPlayers.includes(state.battingPlayer2)) state.battingPlayer2 = '';
+  if (!bowlingPlayers.includes(state.bowler)) state.bowler = '';
 
-  // Populate batsman dropdowns
-  fillSelect(b1, battingPlayers, state.battingPlayer1);
-  fillSelect(b2, battingPlayers, state.battingPlayer2);
+  // Persist updated state
+  saveState(state);
 
-  // Populate bowler dropdown with opposing team players
-  fillSelect(bowler, bowlingPlayers, state.bowler);
+  fillSelect(b1, battingPlayers, state.battingPlayer1, 'Select striker...');
+  fillSelect(b2, battingPlayers, state.battingPlayer2, 'Select non-striker...');
+  fillSelect(bowler, bowlingPlayers, state.bowler, 'Select bowler...');
+
+  if (state.matchStarted) {
+    b1.disabled = true;
+    b2.disabled = true;
+    bowler.disabled = true;
+  } else {
+    b1.disabled = false;
+    b2.disabled = false;
+    bowler.disabled = false;
+  }
+
+  // Defensive logging for team/player binding
+  console.log('setup teams', setup.teamA, setup.teamB, 'firstBatt', setup.firstBatting);
+  console.log('batting squad', battingPlayers, 'bowling squad', bowlingPlayers);
+  console.log('selected', state.battingPlayer1, state.battingPlayer2, state.bowler);
+
+
+  const battingRoster = document.getElementById('battingRoster');
+  const bowlingRoster = document.getElementById('bowlingRoster');
+  if (battingRoster) {
+    battingRoster.innerHTML = battingPlayers.length
+      ? battingPlayers.map((p) => `<li>• ${p}</li>`).join('')
+      : '<li>No batsmen configured</li>';
+  }
+  if (bowlingRoster) {
+    bowlingRoster.innerHTML = bowlingPlayers.length
+      ? bowlingPlayers.map((p) => `<li>• ${p}</li>`).join('')
+      : '<li>No bowlers configured</li>';
+  }
+}
+
+function sanitizeTeamPlayers(players) {
+  if (!Array.isArray(players)) return [];
+  return players.map((p) => (typeof p === 'string' ? p.trim() : '')).filter(Boolean);
 }
 
 
 function render(state, setup) {
   document.getElementById('matchTeams').textContent = `${setup.teamA} vs ${setup.teamB}`;
   setPlayerControls(setup, state);
+  document.getElementById('openingPair').textContent = `${state.battingPlayer1 || '-'} / ${state.battingPlayer2 || '-'}`;
   document.getElementById('battingTeam').textContent = getBattingTeam(setup, state);
   document.getElementById('bowlingTeam').textContent = getBowlingTeam(setup, state);
   document.getElementById('inningsText').textContent = state.innings;
+
+  const matchStatus = document.getElementById('matchStatus');
+  const startMatchBtn = document.getElementById('startMatchBtn');
+  if (state.matchStarted) {
+    if (matchStatus) matchStatus.textContent = 'Match in progress';
+    if (startMatchBtn) startMatchBtn.style.display = 'none';
+  } else {
+    if (matchStatus) matchStatus.textContent = 'Awaiting match start';
+    if (startMatchBtn) startMatchBtn.style.display = 'inline-block';
+  }
   document.getElementById('oversText').textContent = `${state.overs}.${state.balls}`;
   document.getElementById('scoreText').textContent = `${state.runs}/${state.wickets}`;
   document.getElementById('extrasText').textContent = state.extras;
@@ -371,17 +448,19 @@ function showSummaryModal(summary, setup, state) {
     }
   });
 }
+
+function recordUndoAction(state, type, data) {
   if (!state.undoActions) state.undoActions = [];
-  
+
   // Store the action that can be undone
   const action = {
     type: type,
     data: data,
     timestamp: Date.now()
   };
-  
+
   state.undoActions.push(action);
-  
+
   // Keep only last 10 undo actions to prevent memory issues
   if (state.undoActions.length > 10) {
     state.undoActions.shift();
@@ -900,9 +979,33 @@ window.addEventListener('load', () => {
 
   render(state, setup);
 
-  document.getElementById('exportDataBtn').addEventListener('click', () => {
-    exportMatchData(setup, state);
-  });
+  const exportBtn = document.getElementById('exportDataBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      exportMatchData(setup, state);
+    });
+  }
+
+  const startMatchBtn = document.getElementById('startMatchBtn');
+  if (startMatchBtn) {
+    startMatchBtn.addEventListener('click', () => {
+      const battingPlayers = currentBattingPlayers(setup, state);
+      const bowlingPlayers = currentBowlingPlayers(setup, state);
+
+      if (!state.battingPlayer1 && battingPlayers.length > 0) state.battingPlayer1 = battingPlayers[0];
+      if (!state.battingPlayer2 && battingPlayers.length > 1) state.battingPlayer2 = battingPlayers[1] || battingPlayers[0];
+      if (!state.bowler && bowlingPlayers.length > 0) state.bowler = bowlingPlayers[0];
+
+      if (!state.battingPlayer1 || !state.battingPlayer2 || !state.bowler) {
+        alert('Set striker, non-striker, and bowler first.');
+        return;
+      }
+      state.matchStarted = true;
+      console.log('match started:', state.battingPlayer1, state.battingPlayer2, state.bowler);
+      saveState(state);
+      render(state, setup);
+    });
+  }
 
   document.getElementById('showSummaryBtn').addEventListener('click', () => {
     const summary = updateSummary(setup, state);
@@ -910,6 +1013,13 @@ window.addEventListener('load', () => {
   });
 
   document.getElementById('scoreButtons').addEventListener('click', (event) => {
+    if (!state.matchStarted) {
+      // auto-start on first click to avoid apparent dead buttons
+      state.matchStarted = true;
+      saveState(state);
+      render(state, setup);
+    }
+
     const runAttr = event.target.getAttribute('data-run');
     if (runAttr != null) {
       const runs = Number(runAttr);
@@ -945,7 +1055,28 @@ window.addEventListener('load', () => {
         state.overs += 1;
         state.balls = 0;
       }
-      addHistory(state, `Wicket! ${state.battingPlayer1 || 'Unknown'} out vs ${state.bowler || 'Unknown'} - ${getBattingTeam(setup,state)}: ${state.runs}/${state.wickets}`);
+
+      const battingPlayers = currentBattingPlayers(setup, state);
+      const availableNext = battingPlayers.filter((p) => p !== state.battingPlayer1 && p !== state.battingPlayer2);
+      let outPlayer = prompt('Who got out? Type striker or non-striker', 'striker');
+      outPlayer = outPlayer ? outPlayer.trim().toLowerCase() : '';
+
+      if (outPlayer === 'non-striker' || outPlayer === 'nonstriker' || outPlayer === 'non-striker') {
+        outPlayer = state.battingPlayer2;
+      } else {
+        outPlayer = state.battingPlayer1;
+      }
+
+      const nextName = prompt(`Wicket recorded for ${outPlayer}. Enter replacement batsman name (from ${availableNext.join(', ')})`, availableNext[0] || '');
+      if (nextName && nextName.trim()) {
+        if (state.battingPlayer1 === outPlayer) {
+          state.battingPlayer1 = nextName.trim();
+        } else {
+          state.battingPlayer2 = nextName.trim();
+        }
+      }
+
+      addHistory(state, `Wicket! ${outPlayer || 'Unknown'} out vs ${state.bowler || 'Unknown'} - ${getBattingTeam(setup,state)}: ${state.runs}/${state.wickets}`);
     }
 
     saveState(state);

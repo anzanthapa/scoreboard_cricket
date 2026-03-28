@@ -8,6 +8,10 @@
 </head>
 <body>
   <div class="app">
+    <div class="top-nav">
+      <a href="index.html" class="btn-nav btn-home">🏠 Home</a>
+      <span class="btn-nav active">⚙️ Match Setup</span>
+    </div>
     <h1>Match Setup</h1>
     <div class="card">
       <div class="grid2">
@@ -25,22 +29,13 @@
         <button id="firstBatA" class="btn-secondary">🏏 Team A</button>
         <button id="firstBatB" class="btn-secondary">🏏 Team B</button>
       </div>
-      <div style="margin-top:16px;">
+      <div style="margin-top:16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         <label for="scorerPassword">Scorer Password</label>
-        <div style="position: relative;">
-          <input type="password" id="scorerPassword" class="player-input" placeholder="Password for match scorer access" style="padding-right: 40px;" />
-          <button type="button" id="toggleScorerPassword" style="position: absolute; right: 10px; top: 30%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
-        </div>
-        <small style="color:#666;">Required to access scoring controls and continue matches</small>
-      </div>
-      <div style="margin-top:12px;">
+        <input type="text" id="scorerPassword" class="player-input" placeholder="Password for match scorer access" style="flex: 1; min-width:220px;" />
         <label for="viewerPassword">Viewer Password</label>
-        <div style="position: relative;">
-          <input type="password" id="viewerPassword" class="player-input" placeholder="Password for match viewers" style="padding-right: 40px;" />
-          <button type="button" id="toggleViewerPassword" style="position: absolute; right: 10px; top: 30%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
-        </div>
-        <small style="color:#666;">Required for spectators to view the match summary</small>
+        <input type="text" id="viewerPassword" class="player-input" placeholder="Password for match viewers" style="flex: 1; min-width:220px;" />
       </div>
+      <div style="margin-top:6px; color:#666; font-size:0.9em;">Required to access scoring controls and continue matches (scorer + viewer)</div>
     </div>
 
     <div class="card" style="margin-top:16px;">
@@ -48,11 +43,21 @@
       <div class="grid2" style="text-align:center;">
         <div>
           <h4 id="teamAHeader">Team A</h4>
+          <div style="margin-bottom:8px;"><span id="teamAPlayerCount" class="small">11 players</span></div>
           <div id="teamAPlayers"></div>
+          <div style="margin-top:8px; display:flex; justify-content:center; gap:8px;">
+            <button type="button" id="teamAAdd" class="btn-secondary" style="padding:6px 10px;">+ Add player</button>
+            <button type="button" id="teamARemove" class="btn-secondary" style="padding:6px 10px;">– Remove player</button>
+          </div>
         </div>
         <div>
           <h4 id="teamBHeader">Team B</h4>
+          <div style="margin-bottom:8px;"><span id="teamBPlayerCount" class="small">11 players</span></div>
           <div id="teamBPlayers"></div>
+          <div style="margin-top:8px; display:flex; justify-content:center; gap:8px;">
+            <button type="button" id="teamBAdd" class="btn-secondary" style="padding:6px 10px;">+ Add player</button>
+            <button type="button" id="teamBRemove" class="btn-secondary" style="padding:6px 10px;">– Remove player</button>
+          </div>
         </div>
       </div>
       <div style="margin-top:12px; text-align:center;">

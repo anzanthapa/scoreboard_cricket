@@ -58,7 +58,7 @@
 <body>
   <div class="app">
     <h1>🏏 Cricket Scoreboard System</h1>
-    <div id="status" class="status"></div>
+    <div id="status" class="status"><span class="status-text"></span><span class="status-action" id="statusAction"></span></div>
 
     <div class="role-card">
       <h2>🎮 Match Scorer</h2>
@@ -101,84 +101,67 @@
     function updateInterface() {
       const matchId = localStorage.getItem('currentMatchId');
 
-      if (!matchId) {
-        // No match
-        document.getElementById('status').innerHTML = `
-          <strong>⚾ NO MATCH ACTIVE</strong>
-        `;
+      const setupRaw = localStorage.getItem('cricketSetup');
+    const stateRaw = localStorage.getItem('cricketState');
 
-        document.getElementById('controllerDesc').textContent = 'Set up teams and players to start a new match.';
-        document.getElementById('startBtn').style.display = 'inline-block';
-        document.getElementById('continueBtn').style.display = 'none';
+    if (!setupRaw) {
+      document.getElementById('status').innerHTML = `
+        <strong>⚾ NO MATCH ACTIVE</strong>
+      `;
 
-        document.getElementById('viewerDesc').textContent = 'No match available to view right now. Ask the Scorer for the viewer\'s password when a match is active.';
-        document.getElementById('viewerBtn').textContent = 'No Match Available';
-        document.getElementById('viewerBtn').classList.add('disabled');
-        document.getElementById('viewerBtn').href = '#';
-        return;
-      }
+      document.getElementById('controllerDesc').textContent = 'Set up teams and players to start a new match.';
+      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('continueBtn').style.display = 'none';
 
-      // Fetch match data from server
-      fetch(`/api/match/${matchId}`)
-        .then(response => response.json())
-        .then(match => {
-          if (!match) {
-            // Match not found
-            localStorage.removeItem('currentMatchId');
-            updateInterface();
-            return;
-          }
+      document.getElementById('viewerDesc').textContent = 'No match available to view right now. Ask the Scorer for the viewer\'s password when a match is active.';
+      document.getElementById('viewerBtn').textContent = 'No Match Available';
+      document.getElementById('viewerBtn').classList.add('disabled');
+      document.getElementById('viewerBtn').href = '#';
+      return;
+    }
 
-          const setup = match.setup;
-          const state = match.state;
-          const teamA = setup.teamA;
-          const teamB = setup.teamB;
+    const setup = JSON.parse(setupRaw);
+    const state = stateRaw ? JSON.parse(stateRaw) : null;
 
-          if (state && state.runs !== undefined) {
-            // Match in progress
-            const score = `${state.runs}/${state.wickets}`;
-            const overs = `${Math.floor(state.overs)}.${state.balls}`;
+    const teamA = setup.teamA || 'Team A';
+    const teamB = setup.teamB || 'Team B';
 
-            document.getElementById('status').innerHTML = `
-              <strong>🔴 LIVE MATCH:</strong> ${teamA} vs ${teamB}<br>
-              <strong>Score:</strong> ${score} | <strong>Overs:</strong> ${overs}
-            `;
+    if (state && typeof state.runs === 'number') {
+      const score = `${state.runs}/${state.wickets}`;
+      const overs = `${Math.floor(state.overs)}.${state.balls}`;
 
-            document.getElementById('controllerDesc').textContent = 'Continue the live match or start a new one.';
-            document.getElementById('startBtn').style.display = 'inline-block';
-            document.getElementById('continueBtn').style.display = 'inline-block';
-            document.getElementById('continueBtn').classList.remove('disabled');
-            document.getElementById('continueBtn').href = 'scorer_scoreboard.html';
+      document.getElementById('statusAction').innerHTML = `<a href="viewer_scoreboard.html">View Match</a>`;
+      document.querySelector('#status .status-text').innerHTML = `
+        <strong>🔴 LIVE MATCH:</strong> ${teamA} vs ${teamB}<br>
+        <strong>Score:</strong> ${score} | <strong>Overs:</strong> ${overs}
+      `;
 
-            document.getElementById('viewerBtn').classList.remove('disabled');
-            document.getElementById('viewerBtn').href = `viewer_scoreboard.html?match=${matchId}`;
-            document.getElementById('viewerBtn').textContent = 'View Live Match';
-          } else {
-            // Setup exists but no match started
-            document.getElementById('status').innerHTML = `
-              <strong>⚽ MATCH READY:</strong> ${teamA} vs ${teamB}<br>
-              Teams configured, ready to start scoring.
-            `;
+      document.getElementById('controllerDesc').textContent = 'Continue the live match or start a new one.';
+      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('continueBtn').style.display = 'inline-block';
+      document.getElementById('continueBtn').classList.remove('disabled');
+      document.getElementById('continueBtn').href = 'scorer_scoreboard.html';
 
-            document.getElementById('controllerDesc').textContent = 'Start scoring the configured match or set up a new one.';
-            document.getElementById('startBtn').style.display = 'inline-block';
-            document.getElementById('continueBtn').style.display = 'inline-block';
-            document.getElementById('continueBtn').classList.remove('disabled');
-            document.getElementById('continueBtn').href = 'scorer_scoreboard.html';
+      document.getElementById('viewerBtn').classList.remove('disabled');
+      document.getElementById('viewerBtn').href = 'viewer_scoreboard.html';
+      document.getElementById('viewerBtn').textContent = 'View Live Match';
+    } else {
+      document.getElementById('statusAction').innerHTML = '';
+      document.querySelector('#status .status-text').innerHTML = `
+        <strong>⚽ MATCH READY:</strong> ${teamA} vs ${teamB}<br>
+        Teams configured, ready to start scoring.
+      `;
 
-            document.getElementById('viewerBtn').classList.add('disabled');
-            document.getElementById('viewerBtn').textContent = 'Match Not Started';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching match data:', error);
-          // Fallback to no match state
-          document.getElementById('status').innerHTML = `
-            <strong>⚾ CONNECTION ISSUE</strong>
-          `;
-          document.getElementById('viewerBtn').classList.add('disabled');
-          document.getElementById('viewerBtn').textContent = 'Connection Error';
-        });
+      document.getElementById('controllerDesc').textContent = 'Start scoring the configured match or set up a new one.';
+      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('continueBtn').style.display = 'inline-block';
+      document.getElementById('continueBtn').classList.remove('disabled');
+      document.getElementById('continueBtn').href = 'scorer_scoreboard.html';
+
+      document.getElementById('viewerBtn').classList.add('disabled');
+      document.getElementById('viewerBtn').textContent = 'Match Not Started';
+      document.getElementById('viewerBtn').href = '#';
+    }
     }
 
     // Update on load

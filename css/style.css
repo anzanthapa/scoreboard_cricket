@@ -3,17 +3,36 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 h1 { margin-top: 0; text-align: center; color: #1b3c7a; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .card { background: #f9fbff; border: 1px solid #dbe4f0; border-radius: 10px; padding: 15px; }
+#infoCard { background: linear-gradient(170deg, #0a5ad2 0%, #2b8dfe 40%, #56b8ff 100%); color: #fff; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 30px rgba(0,0,70,0.2); }
+#infoCard h3, #infoCard .small, #infoCard .status span, #infoCard .status strong { color: #fff; }
+#infoCard .scoreline { font-size: 3.5rem; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+#infoCard .player-input { border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.2); color: #fff; }
 #battingCard { position: sticky; top: 10px; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,.08); }
-label { display:block; margin-bottom:6px; font-weight:600; }
-input[type=text] { width:100%; padding:8px; border:1px solid #b8c8e6; border-radius:6px; }
+label { display:block; margin-bottom:6px; font-weight:600; }.scoreboard-main { display: flex; flex-direction: column; gap: 16px; }
+.scoreboard-hero { background: linear-gradient(135deg, #2e72d5 0%, #316eaa 100%); border-radius: 12px; color: #fff; padding: 18px 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.16); }
+.scoreboard-hero h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.scoreboard-hero p { margin: 0; opacity: 0.92; font-size: 0.95rem; }
+.scoreboard-content { display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 800px) { .scoreboard-hero { padding: 14px 14px; } .scoreboard-hero h1 { font-size: 1.25rem; } }input[type=text] { width:100%; padding:8px; border:1px solid #b8c8e6; border-radius:6px; }
 button { border: none; border-radius: 8px; padding: 10px 14px; margin: 6px 4px 4px 0; font-weight:600; cursor:pointer; transition:.13s ease; }
 button:hover { transform: translateY(-1px); }
+.top-nav { position: sticky; top: 0; z-index: 999; display: flex; justify-content: center; gap: 12px; align-items: center; flex-wrap: wrap; background: rgba(12, 27, 66, 0.88); backdrop-filter: blur(12px); border-radius: 0 0 12px 12px; padding: 10px 14px; box-shadow: 0 10px 18px rgba(0,0,0,0.25); margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.16); }
+.top-nav a, .top-nav .btn-nav { font-size: 0.97rem; font-weight: 700; color: #f3f8ff; text-decoration: none; border-radius: 999px; padding: 8px 14px; border: 1px solid transparent; transition: .2s ease-in-out; display: inline-flex; align-items: center; gap: 6px; }
+.top-nav a:hover, .top-nav .btn-nav:hover { background: rgba(255,255,255,0.2); box-shadow: 0 6px 14px rgba(0,0,0,0.2); transform: translateY(-1px); }
+.top-nav .btn-nav.active { background: #fff; color: #1b3d7a; border-color: #a3c4f7; box-shadow: 0 6px 16px rgba(30, 95, 175, 0.25); }
+.top-nav .btn-nav.active:hover { background: #fff; }
+.btn-home { background: linear-gradient(90deg, #57a3f5 0%, #2c68cc 100%); color: white; border-radius: 999px; padding: 8px 14px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; border: 1px solid rgba(255,255,255,0.4); }
+.btn-home:hover { background: linear-gradient(90deg, #3c8ae3 0%, #2154a9 100%); }
 .btn-primary { background: #1f77e1; color: #fff; }
 .btn-primary:disabled { opacity:.65; cursor:not-allowed; }
 .btn-secondary { background: #5b7fc0; color: #fff; }
 .btn-warning { background: #ff9e19; color:#fff; }
 .btn-danger { background: #de3a34; color:#fff; }
-.status { display:flex; align-items:center; gap:12px; margin-bottom:10px; font-weight:700; }
+.status { display:flex; align-items:center; justify-content: space-between; gap:12px; margin-bottom:10px; font-weight:700; }
+.status .status-text { flex: 1; }
+.status .status-action { margin-left: 10px; }
+.status-action a { padding: 6px 10px; border-radius: 8px; background: #ffeaa2; color: #2d3436; font-weight: 700; text-decoration:none; border: 1px solid #fdcb6e; transition: .2s; }
+.status-action a:hover { background: #fdcb6e; }
 .scoreline { font-size: 3rem; font-weight:800; text-align:center; margin:12px 0; color:#132654; }
 .small { font-size:.95rem; color:#3f5171; }
 .actions { margin-top:10px; }
@@ -35,7 +54,7 @@ button:hover { transform: translateY(-1px); }
   button { padding: 12px 16px; font-size: 16px; }
   .scoreline { font-size: 2.5rem; }
   input[type=text], .player-input { font-size: 16px; padding: 10px; }
-  .status { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .status { flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; }
   .history { max-height: 150px; }
 }
 
