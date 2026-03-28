@@ -23,15 +23,16 @@
       </div>
       <div class="status" style="justify-content: space-between; padding-top:8px;">
         <div>
-          <label class="small" for="battingPlayer1">Batsman:</label>
-          <div style="display:flex; gap:8px; align-items:center;">
-            <select id="battingPlayer1" class="player-input"></select>
-            <select id="battingPlayer2" class="player-input"></select>
-          </div>
+          <label class="small" for="battingPlayer1">Striker:</label>
+          <select id="battingPlayer1" class="player-input"></select>
+        </div>
+        <div>
+          <label class="small" for="battingPlayer2">Non-striker:</label>
+          <select id="battingPlayer2" class="player-input"></select>
         </div>
         <div>
           <label class="small" for="bowlerSelect">Bowler:</label>
-          <select id="bowlerSelect" class="player-input"></select>
+          <input type="text" id="bowlerSelect" class="player-input" placeholder="Enter bowler name" />
         </div>
       </div>
       <div class="scoreline" id="scoreText">0/0</div>
@@ -66,13 +67,15 @@
     <div class="card" style="margin-top:16px;">
       <h3>Match Controls</h3>
       <div class="actions">
-        <button id="shareBtn" class="btn-primary">Share Summary</button>
+        <button id="exportDataBtn" class="btn-primary">Export Match Data (JSON)</button>
+        <button id="showSummaryBtn" class="btn-primary">Show Match Summary</button>
         <button id="switchInningsBtn" class="btn-secondary">Switch Innings</button>
         <button id="endMatchBtn" class="btn-danger">End Match</button>
       </div>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/scoreboard.js"></script>
 
   <footer style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); color: #666; margin-top: 40px;">

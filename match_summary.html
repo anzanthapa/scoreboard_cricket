@@ -3,20 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Match Result</title>
+  <title>Match Summary</title>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="app">
-    <h1>Match Result</h1>
+    <h1>Match Summary</h1>
     <div class="card">
+      <h2>Final Result</h2>
       <p id="finalResult">No match data available.</p>
-      <h3>Innings Records</h3>
-      <ul id="finalInningsList" class="history"></ul>
-      <div style="margin-top:10px; text-align:center;">
-        <button id="exportResultPDFBtn" class="btn-primary" style="margin-right:10px;">Export PDF Report</button>
-        <a href="setup.html"><button class="btn-primary">New Match</button></a>
+      <h3>Complete Innings Summary</h3>
+      <div id="finalInningsList" class="history"></div>
+      <h3>Match Statistics</h3>
+      <div id="matchStats">Loading match statistics...</div>
+      <div style="margin-top:20px; text-align:center;">
+        <button id="exportResultPDFBtn" class="btn-primary" style="margin-right:10px;">Export Complete PDF Report</button>
+        <a href="match_setup.html"><button class="btn-primary">Start New Match</button></a>
       </div>
     </div>
   </div>

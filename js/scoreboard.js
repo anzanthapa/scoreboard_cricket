@@ -33,18 +33,21 @@ function getBowlingTeam(setup, state) {
 function updateSummary(setup, state) {
   const summaryDiv = document.getElementById('inningsSummary');
   if (!state.inningsSummary || !state.inningsSummary.length) {
-    summaryDiv.textContent = 'No previous innings yet.';
-    return;
+    const noSummary = 'No previous innings yet.';
+    if (summaryDiv) summaryDiv.textContent = noSummary;
+    return noSummary;
   }
 
   const lines = state.inningsSummary.map((rec, idx) => {
     const team = idx === 0
       ? (setup.firstBatting === 'A' ? setup.teamA : setup.teamB)
       : (setup.firstBatting === 'A' ? setup.teamB : setup.teamA);
-    return `<strong>${team}</strong> (Innings ${idx + 1}): ${rec.runs}/${rec.wickets} in ${rec.overs.toFixed(1)} overs`;
+    return `${team} (Innings ${idx + 1}): ${rec.runs}/${rec.wickets} in ${rec.overs.toFixed(1)} overs`;
   });
 
-  summaryDiv.innerHTML = lines.join('<br>');
+  const summaryText = lines.join('\n');
+  if (summaryDiv) summaryDiv.innerHTML = lines.map(line => `<div>${line}</div>`).join('');
+  return summaryText;
 }
 
 function currentBattingPlayers(setup, state) {
@@ -68,7 +71,6 @@ function currentBowlingPlayers(setup, state) {
 
 function setPlayerControls(setup, state) {
   const battingPlayers = currentBattingPlayers(setup, state);
-  const bowlingPlayers = currentBowlingPlayers(setup, state);
 
   const b1 = document.getElementById('battingPlayer1');
   const b2 = document.getElementById('battingPlayer2');
@@ -85,16 +87,17 @@ function setPlayerControls(setup, state) {
     });
   };
 
-  if (!state.battingPlayer1) state.battingPlayer1 = battingPlayers[0] || 'N/A';
-  if (!state.battingPlayer2) state.battingPlayer2 = battingPlayers[1] || battingPlayers[0] || 'N/A';
-  if (!state.bowler) state.bowler = bowlingPlayers[0] || 'N/A';
+  // Set default values if not set
+  if (!state.battingPlayer1) state.battingPlayer1 = battingPlayers[0] || '';
+  if (!state.battingPlayer2) state.battingPlayer2 = battingPlayers[1] || battingPlayers[0] || '';
+  if (!state.bowler) state.bowler = '';
 
+  // Populate batsman dropdowns
   fillSelect(b1, battingPlayers, state.battingPlayer1);
   fillSelect(b2, battingPlayers, state.battingPlayer2);
-  fillSelect(bowler, bowlingPlayers, state.bowler);
 
-  document.getElementById('currentBatting').textContent = `Batting: ${getBattingTeam(setup, state)} (${state.battingPlayer1}, ${state.battingPlayer2})`;
-  document.getElementById('matchTeams').textContent = `Bowling: ${getBowlingTeam(setup, state)} (Bowler: ${state.bowler})`;
+  // Set bowler text input
+  bowler.value = state.bowler;
 }
 
 
@@ -201,7 +204,7 @@ function endMatch(setup, state) {
     finalResult: computeResult(setup, state),
   };
   localStorage.setItem('cricketResult', JSON.stringify(result));
-  window.location.href = 'scorer_result.html';
+  window.location.href = 'match_summary.html';
 }
 
 function checkScorerPassword() {
@@ -220,6 +223,12 @@ function checkScorerPassword() {
     return false;
   }
 
+  // Check if user just set up the match - skip password prompt
+  if (localStorage.getItem('justSetup') === 'true') {
+    localStorage.removeItem('justSetup'); // Clear the flag
+    return true;
+  }
+
   const enteredPassword = prompt('Enter scorer password:');
   if (enteredPassword !== storedPassword) {
     alert('Incorrect password. Access denied.');
@@ -228,6 +237,124 @@ function checkScorerPassword() {
   }
 
   return true;
+}
+
+function exportMatchData(setup, state) {
+  const matchData = {
+    exportDate: new Date().toISOString(),
+    setup: setup,
+    currentState: state,
+    inningsSummary: state.inningsSummary || [],
+    commentary: state.history || [],
+    metadata: {
+      exportedBy: 'Cricket Scoreboard System',
+      version: '1.0',
+      totalRuns: state.runs,
+      totalWickets: state.wickets,
+      totalOvers: state.overs + state.balls / 6,
+      currentInnings: state.innings,
+      matchStatus: state.matchEnded ? 'Completed' : 'In Progress'
+    }
+  };
+
+  const dataStr = JSON.stringify(matchData, null, 2);
+  const dataBlob = new Blob([dataStr], {type: 'application/json'});
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(dataBlob);
+  link.download = `cricket_match_${setup.teamA}_vs_${setup.teamB}_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportMatchPDF(setup, state) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // Title
+  doc.setFontSize(20);
+  doc.text('Cricket Match Report', 105, 20, { align: 'center' });
+  
+  // Match Info
+  doc.setFontSize(14);
+  doc.text(`${setup.teamA} vs ${setup.teamB}`, 105, 35, { align: 'center' });
+  doc.setFontSize(12);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
+  doc.text(`First Batting: ${setup.firstBatting === 'A' ? setup.teamA : setup.teamB}`, 20, 60);
+  
+  // Passwords (as requested)
+  doc.setFontSize(10);
+  doc.text(`Scorer Password: ${setup.scorerPassword || 'Not set'}`, 20, 75);
+  doc.text(`Viewer Password: ${setup.viewerPassword || 'Not set'}`, 20, 85);
+  
+  // Current Score
+  doc.setFontSize(14);
+  doc.text('Current Score:', 20, 105);
+  doc.setFontSize(12);
+  doc.text(`${getBattingTeam(setup, state)}: ${state.runs}/${state.wickets} (${state.overs}.${state.balls} overs)`, 30, 115);
+  doc.text(`Extras: ${state.extras} (W:${state.wide}, NB:${state.noball}, B:${state.bye}, LB:${state.legbye})`, 30, 125);
+  
+  // Players
+  doc.text(`Striker: ${state.battingPlayer1 || 'Not set'}`, 30, 140);
+  doc.text(`Non-striker: ${state.battingPlayer2 || 'Not set'}`, 30, 150);
+  doc.text(`Bowler: ${state.bowler || 'Not set'}`, 30, 160);
+  
+  let yPos = 180;
+  
+  // Innings Summary
+  if (state.inningsSummary && state.inningsSummary.length > 0) {
+    doc.setFontSize(14);
+    doc.text('Innings Summary:', 20, yPos);
+    yPos += 15;
+    
+    doc.setFontSize(10);
+    state.inningsSummary.forEach((inning, idx) => {
+      doc.text(`${inning.batting}: ${inning.runs}/${inning.wickets} in ${inning.overs.toFixed(1)} overs`, 30, yPos);
+      yPos += 10;
+    });
+    yPos += 10;
+  }
+  
+  // Final Result
+  if (state.matchEnded) {
+    doc.setFontSize(14);
+    doc.text('Final Result:', 20, yPos);
+    doc.setFontSize(12);
+    doc.text(computeResult(setup, state), 30, yPos + 15);
+    yPos += 35;
+  }
+  
+  // Recent Commentary (last 10 entries)
+  if (state.history && state.history.length > 0) {
+    doc.setFontSize(14);
+    doc.text('Recent Commentary:', 20, yPos);
+    yPos += 15;
+    
+    doc.setFontSize(8);
+    const recentCommentary = state.history.slice(-10);
+    recentCommentary.forEach((entry, idx) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(entry, 30, yPos);
+      yPos += 8;
+    });
+  }
+  
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.text(`Generated by Cricket Scoreboard System - Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+  }
+  
+  // Save the PDF
+  const filename = `cricket_match_${setup.teamA}_vs_${setup.teamB}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(filename);
+  alert('Match report exported as PDF successfully!');
 }
 
 function checkAndResetDailyData() {
@@ -257,8 +384,16 @@ window.addEventListener('load', () => {
 
   render(state, setup);
 
-  document.getElementById('shareBtn').addEventListener('click', () => {
-    window.open('viewer_scoreboard.html', '_blank');
+  document.getElementById('exportDataBtn').addEventListener('click', () => {
+    exportMatchData(setup, state);
+  });
+
+  document.getElementById('showSummaryBtn').addEventListener('click', () => {
+    const summary = updateSummary(setup, state);
+    const exportChoice = confirm(`Match Summary:\n\n${summary}\n\nWould you like to export this match as a PDF report?`);
+    if (exportChoice) {
+      exportMatchPDF(setup, state);
+    }
   });
 
   document.getElementById('scoreButtons').addEventListener('click', (event) => {
@@ -335,10 +470,9 @@ window.addEventListener('load', () => {
     saveState(state);
     render(state, setup);
   });
-  document.getElementById('bowlerSelect').addEventListener('change', (e) => {
+  document.getElementById('bowlerSelect').addEventListener('input', (e) => {
     state.bowler = e.target.value;
     saveState(state);
-    render(state, setup);
   });
 
   document.getElementById('endMatchBtn').addEventListener('click', () => endMatch(setup, state));

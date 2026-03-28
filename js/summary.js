@@ -1,3 +1,6 @@
+let currentMatchId = null;
+let socket = null;
+
 function loadSetup() {
   const raw = localStorage.getItem('cricketSetup');
   if (!raw) {
@@ -130,11 +133,11 @@ window.addEventListener('load', () => {
     }
   });
 
-  // Auto-refresh every 15 seconds
+  // Auto-refresh every 10 seconds
   setInterval(() => {
     const currentState = loadState();
     if (currentState) {
       render(currentState, setup);
     }
-  }, 15000);
+  }, 10000);
 });

@@ -74,6 +74,7 @@ function saveSetup() {
     matchEnded: false,
   };
   localStorage.setItem('cricketState', JSON.stringify(initialGame));
+  localStorage.setItem('justSetup', 'true'); // Flag to skip password check on first access
   window.location.href = 'scorer_scoreboard.html';
 }
 
@@ -107,6 +108,7 @@ function checkAndResetDailyData() {
     localStorage.removeItem('cricketSetup');
     localStorage.removeItem('cricketState');
     localStorage.removeItem('cricketResult');
+    localStorage.removeItem('justSetup');
     localStorage.setItem('cricketLastReset', today);
   }
 }
