@@ -1,0 +1,30 @@
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f6f8fb; color: #202a44; }
+.app { max-width: 900px; margin: 30px auto; background: #fff; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,.08); padding: 20px; }
+h1 { margin-top: 0; text-align: center; color: #1b3c7a; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.card { background: #f9fbff; border: 1px solid #dbe4f0; border-radius: 10px; padding: 15px; }
+#battingCard { position: sticky; top: 10px; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,.08); }
+label { display:block; margin-bottom:6px; font-weight:600; }
+input[type=text] { width:100%; padding:8px; border:1px solid #b8c8e6; border-radius:6px; }
+button { border: none; border-radius: 8px; padding: 10px 14px; margin: 6px 4px 4px 0; font-weight:600; cursor:pointer; transition:.13s ease; }
+button:hover { transform: translateY(-1px); }
+.btn-primary { background: #1f77e1; color: #fff; }
+.btn-primary:disabled { opacity:.65; cursor:not-allowed; }
+.btn-secondary { background: #5b7fc0; color: #fff; }
+.btn-warning { background: #ff9e19; color:#fff; }
+.btn-danger { background: #de3a34; color:#fff; }
+.status { display:flex; align-items:center; gap:12px; margin-bottom:10px; font-weight:700; }
+.scoreline { font-size: 3rem; font-weight:800; text-align:center; margin:12px 0; color:#132654; }
+.small { font-size:.95rem; color:#3f5171; }
+.actions { margin-top:10px; }
+.history { max-height:200px; overflow:auto; background:#f0f4fa; border-radius:8px; border:1px solid #d3e0f3; padding:8px; font-size:.9rem; }
+.history li { margin:2px 0; }
+.full-width { width: 100%; }
+.player-input { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #b8c8e6; border-radius: 6px; }
+.btn-active { box-shadow: inset 0 0 0 2px rgba(0, 87, 255, 0.45); }
+
+@media (max-width: 800px) {
+  .grid2 { grid-template-columns: 1fr; }
+  #battingCard { position: static; }
+}
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cricket Match Setup</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Match Setup</h1>
+    <div class="card">
+      <div class="grid2">
+        <div>
+          <label for="teamAInput">Team A</label>
+          <input type="text" id="teamAInput" class="player-input" value="Team A" />
+        </div>
+        <div>
+          <label for="teamBInput">Team B</label>
+          <input type="text" id="teamBInput" class="player-input" value="Team B" />
+        </div>
+      </div>
+      <div style="margin-top:12px; text-align:center;" class="status">
+        <span class="small">1st Batting: </span>
+        <button id="firstBatA" class="btn-secondary">🏏 Team A</button>
+        <button id="firstBatB" class="btn-secondary">🏏 Team B</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Players</h3>
+      <div class="grid2" style="text-align:center;">
+        <div>
+          <h4>Team A</h4>
+          <div id="teamAPlayers"></div>
+        </div>
+        <div>
+          <h4>Team B</h4>
+          <div id="teamBPlayers"></div>
+        </div>
+      </div>
+      <div style="margin-top:12px; text-align:center;">
+        <button id="startBtn" class="btn-primary full-width" style="max-width:260px;">Start Match</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/setup.js"></script>
+</body>
+</html>

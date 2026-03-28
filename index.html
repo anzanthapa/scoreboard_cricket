@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cricket Scoreboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Cricket Scoreboard</h1>
+
+    <div id="setupCard" class="card" style="margin-top:16px;">
+      <h3>Match Setup</h3>
+      <div class="grid2" style="text-align:center; margin-bottom:8px;">
+        <div>
+          <label for="teamAInput" class="small">Team A</label>
+          <input type="text" id="teamAInput" value="Team A" class="player-input" />
+        </div>
+        <div>
+          <label for="teamBInput" class="small">Team B</label>
+          <input type="text" id="teamBInput" value="Team B" class="player-input" />
+        </div>
+      </div>
+      <div class="status" style="justify-content:center; margin-bottom:12px;">
+        <span class="small" style="margin-right:10px;">First batting:</span>
+        <button id="chooseBatA" class="btn-secondary" type="button">🏏 Team A</button>
+        <button id="chooseBatB" class="btn-secondary" type="button">🏏 Team B</button>
+      </div>
+      <div class="grid2">
+        <div id="teamAPlayers" class="card" style="padding:10px; background:#eef4ff; text-align:center;">
+          <h4 id="teamAHeader" style="margin:4px 0 8px;">Team A</h4>
+          <div id="teamAPlayerFields"></div>
+        </div>
+        <div id="teamBPlayers" class="card" style="padding:10px; background:#eef4ff; text-align:center;">
+          <h4 id="teamBHeader" style="margin:4px 0 8px;">Team B</h4>
+          <div id="teamBPlayerFields"></div>
+        </div>
+      </div>
+      <div style="margin-top:10px; text-align:center;">
+        <button id="newMatchBtn" class="btn-primary full-width" style="max-width:240px;">Start / Reset match</button>
+      </div>
+    </div>
+
+    <div id="matchPanel" class="grid2" style="margin-top:16px; display:none;">
+      <div class="card" id="battingCard">
+        <div class="status">
+          <span>Innings:</span><span id="inningsText">1</span>
+          <span style="margin-left:auto;">Overs:</span><span id="oversText">0.0</span>
+        </div>
+        <div class="scoreline" id="scoreText">0/0</div>
+        <div class="small">Extras: <span id="extrasText">0</span> &nbsp;&nbsp; Wides: <span id="widesCount">0</span>  NoBalls: <span id="noballsCount">0</span>  Byes: <span id="byesCount">0</span>  LegByes: <span id="legbyesCount">0</span></div>
+        <div class="small">Runs: <span id="runsText">0</span> &nbsp; Wickets: <span id="wicketsText">0</span></div>
+
+        <div class="actions" id="scoreButtons">
+          <button class="btn-secondary" data-run="0">Dot</button>
+          <button class="btn-secondary" data-run="1">1</button>
+          <button class="btn-secondary" data-run="2">2</button>
+          <button class="btn-secondary" data-run="3">3</button>
+          <button class="btn-secondary" data-run="4">4</button>
+          <button class="btn-secondary" data-run="5">5</button>
+          <button class="btn-secondary" data-run="6">6</button>
+          <button class="btn-warning" id="wicketBtn">Wicket</button>
+        </div>
+
+        <div class="actions" style="border-top:1px dashed #cdd9ec; padding-top:8px; margin-top:8px;">
+          <button class="btn-primary" data-extra="WIDE">Wide +1</button>
+          <button class="btn-primary" data-extra="NOBALL">No-ball +1</button>
+          <button class="btn-primary" data-extra="BYE">Bye +1</button>
+          <button class="btn-primary" data-extra="LEG_BYE">Leg bye +1</button>
+        </div>
+
+        <div class="actions" style="border-top:1px dashed #cdd9ec; padding-top:8px; margin-top:8px;">
+          <button class="btn-danger" id="undoBtn">Undo last action</button>
+          <button class="btn-secondary" id="endOverBtn">Complete over</button>
+          <button class="btn-warning" id="swapInningsBtn">Switch innings</button>
+          <button class="btn-warning" id="endMatchBtn">End match</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Current Match Summary</h3>
+        <ul class="history" id="historyList"></ul>
+      </div>
+    </div>
+
+    <div id="matchResultCard" class="card" style="margin-top:16px; display:none;">
+      <h3>Match result</h3>
+      <p id="resultText" class="small">Match is not finished yet.</p>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

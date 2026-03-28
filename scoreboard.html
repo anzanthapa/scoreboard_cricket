@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cricket Scoreboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Cricket Scoreboard</h1>
+    <div class="card" id="infoCard">
+      <div class="status" style="justify-content: space-between;">
+        <span id="matchTeams">Team A vs Team B</span>
+        <span id="currentBatting">Batting: Team A</span>
+      </div>
+      <div class="status" style="justify-content: space-between; padding-top:8px;">
+        <span>Innings: <strong id="inningsText">1</strong></span>
+        <span>Overs: <strong id="oversText">0.0</strong></span>
+      </div>
+      <div class="scoreline" id="scoreText">0/0</div>
+      <div class="small">Extras: <span id="extrasText">0</span> • Wides: <span id="widesText">0</span> • NoBalls: <span id="noballsText">0</span> • Byes: <span id="byesText">0</span> • LegByes: <span id="legbyesText">0</span></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Scoring Controls</h3>
+      <div class="actions" id="scoreButtons">
+        <button class="btn-secondary" data-run="0">Dot</button>
+        <button class="btn-secondary" data-run="1">1</button>
+        <button class="btn-secondary" data-run="2">2</button>
+        <button class="btn-secondary" data-run="3">3</button>
+        <button class="btn-secondary" data-run="4">4</button>
+        <button class="btn-secondary" data-run="5">5</button>
+        <button class="btn-secondary" data-run="6">6</button>
+        <button class="btn-warning" id="wicketBtn">Wicket</button>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn-primary" data-extra="WIDE">Wide</button>
+        <button class="btn-primary" data-extra="NOBALL">No-ball</button>
+        <button class="btn-primary" data-extra="BYE">Bye</button>
+        <button class="btn-primary" data-extra="LEG_BYE">Leg bye</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Match Progress</h3>
+      <div id="inningsSummary" class="small">No previous innings yet.</div>
+      <ul class="history" id="historyList"></ul>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Actions</h3>
+      <div class="actions">
+        <button id="switchInningsBtn" class="btn-secondary">Switch Innings</button>
+        <button id="endMatchBtn" class="btn-danger">End Match</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/scoreboard.js"></script>
+</body>
+</html>
